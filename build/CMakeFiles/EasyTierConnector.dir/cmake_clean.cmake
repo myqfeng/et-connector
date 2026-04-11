@@ -1,7 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/EasyTierConnector_autogen.dir/AutogenUsed.txt"
-  "CMakeFiles/EasyTierConnector_autogen.dir/ParseCache.txt"
-  "EasyTierConnector_autogen"
   "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj"
   "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj.d"
   "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj"
@@ -19,6 +16,9 @@ file(REMOVE_RECURSE
   "CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj.d"
   "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj"
   "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj.d"
+  "CMakeFiles/EasyTierConnector_autogen.dir/AutogenUsed.txt"
+  "CMakeFiles/EasyTierConnector_autogen.dir/ParseCache.txt"
+  "EasyTierConnector_autogen"
   "EasyTierConnector.exe"
   "EasyTierConnector.exe.manifest"
   "EasyTierConnector.pdb"

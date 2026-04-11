@@ -52,10 +52,10 @@ RM = C:\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\YMHuang\Desktop\et-web-connector
+CMAKE_SOURCE_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\YMHuang\Desktop\et-web-connector\build
+CMAKE_BINARY_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build
 
 # Utility rule file for EasyTierConnector_autogen.
 
@@ -70,9 +70,9 @@ CMakeFiles/EasyTierConnector_autogen: EasyTierConnector_autogen/timestamp
 EasyTierConnector_autogen/timestamp: C:/Qt/6.10.1/llvm-mingw_64/bin/moc.exe
 EasyTierConnector_autogen/timestamp: C:/Qt/6.10.1/llvm-mingw_64/bin/uic.exe
 EasyTierConnector_autogen/timestamp: CMakeFiles/EasyTierConnector_autogen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target EasyTierConnector"
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autogen C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutogenInfo.json Debug
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector_autogen/timestamp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target EasyTierConnector"
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autogen E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutogenInfo.json ""
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E touch E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/EasyTierConnector_autogen/timestamp
 
 EasyTierConnector_autogen: CMakeFiles/EasyTierConnector_autogen
 EasyTierConnector_autogen: EasyTierConnector_autogen/timestamp
@@ -88,6 +88,6 @@ CMakeFiles/EasyTierConnector_autogen.dir/clean:
 .PHONY : CMakeFiles/EasyTierConnector_autogen.dir/clean
 
 CMakeFiles/EasyTierConnector_autogen.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles\EasyTierConnector_autogen.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles\EasyTierConnector_autogen.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/EasyTierConnector_autogen.dir/depend
 

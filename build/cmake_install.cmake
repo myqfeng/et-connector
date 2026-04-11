@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/YMHuang/Desktop/et-web-connector
+# Install script for directory: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/EasyTierConnector")
+  set(CMAKE_INSTALL_PREFIX "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/Install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Debug")
+    set(CMAKE_INSTALL_CONFIG_NAME "")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -38,7 +38,7 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector.exe")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/EasyTierConnector.exe")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/EasyTierConnector.exe" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/EasyTierConnector.exe")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -49,14 +49,14 @@ endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "C:/Program Files (x86)/EasyTierConnector/etcore/")
+   "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/Install/etcore/")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "C:/Program Files (x86)/EasyTierConnector/etcore" TYPE DIRECTORY FILES "C:/Users/YMHuang/Desktop/et-web-connector/etcore/" USE_SOURCE_PERMISSIONS)
+  file(INSTALL DESTINATION "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/Install/etcore" TYPE DIRECTORY FILES "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/etcore/" USE_SOURCE_PERMISSIONS)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
@@ -93,6 +93,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "C:/Users/YMHuang/Desktop/et-web-connector/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

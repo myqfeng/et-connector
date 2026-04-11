@@ -52,10 +52,10 @@ RM = C:\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\YMHuang\Desktop\et-web-connector
+CMAKE_SOURCE_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\YMHuang\Desktop\et-web-connector\build
+CMAKE_BINARY_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build
 
 # Utility rule file for EasyTierConnector_autogen_timestamp_deps.
 
@@ -77,6 +77,6 @@ CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir/clean:
 .PHONY : CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir/clean
 
 CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles\EasyTierConnector_autogen_timestamp_deps.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles\EasyTierConnector_autogen_timestamp_deps.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir/depend
 

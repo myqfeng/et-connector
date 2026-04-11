@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QSysInfo>
 
-ETRunWorkerWin::ETRunWorkerWin(QObject *parent)
+ETRunWorker::ETRunWorker(QObject *parent)
     : QObject(parent)
     , m_process(new QProcess(this))
     , m_startTimer(new QTimer(this))
@@ -18,35 +18,35 @@ ETRunWorkerWin::ETRunWorkerWin(QObject *parent)
     
     // 连接进程信号
     connect(m_process, &QProcess::started,
-            this, &ETRunWorkerWin::onProcessStarted);
+            this, &ETRunWorker::onProcessStarted);
     connect(m_process, &QProcess::readyReadStandardOutput,
-            this, &ETRunWorkerWin::onProcessReadyReadStandardOutput);
+            this, &ETRunWorker::onProcessReadyReadStandardOutput);
     connect(m_process, &QProcess::readyReadStandardError,
-            this, &ETRunWorkerWin::onProcessReadyReadStandardError);
+            this, &ETRunWorker::onProcessReadyReadStandardError);
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, &ETRunWorkerWin::onProcessFinished);
+            this, &ETRunWorker::onProcessFinished);
     
     // Qt5 兼容：连接 errorOccurred 信号
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     connect(m_process, &QProcess::errorOccurred,
-            this, &ETRunWorkerWin::onProcessError);
+            this, &ETRunWorker::onProcessError);
 #else
     connect(m_process, QOverload<QProcess::ProcessError>::of(&QProcess::error),
-            this, &ETRunWorkerWin::onProcessError);
+            this, &ETRunWorker::onProcessError);
 #endif
     
     // 连接超时定时器
-    connect(m_startTimer, &QTimer::timeout, this, &ETRunWorkerWin::onStartTimeout);
-    connect(m_stopTimer, &QTimer::timeout, this, &ETRunWorkerWin::onStopTimeout);
+    connect(m_startTimer, &QTimer::timeout, this, &ETRunWorker::onStartTimeout);
+    connect(m_stopTimer, &QTimer::timeout, this, &ETRunWorker::onStopTimeout);
 }
 
-ETRunWorkerWin::~ETRunWorkerWin()
+ETRunWorker::~ETRunWorker()
 {
     // 强制停止并等待进程结束
     stopAndWait();
 }
 
-void ETRunWorkerWin::start(const QString &connectionKey)
+void ETRunWorker::start(const QString &connectionKey)
 {
     // 验证参数
     if (connectionKey.isEmpty()) {
@@ -101,7 +101,7 @@ void ETRunWorkerWin::start(const QString &connectionKey)
     m_startTimer->start(START_TIMEOUT_MS);
 }
 
-void ETRunWorkerWin::stop()
+void ETRunWorker::stop()
 {
     // 检查当前状态
     if (m_state == State::NotStarted) {
@@ -128,7 +128,7 @@ void ETRunWorkerWin::stop()
     terminateProcess();
 }
 
-void ETRunWorkerWin::stopAndWait()
+void ETRunWorker::stopAndWait()
 {
     // 停止所有定时器
     m_startTimer->stop();
@@ -156,12 +156,12 @@ void ETRunWorkerWin::stopAndWait()
     qDebug() << "EasyTier 进程已停止";
 }
 
-bool ETRunWorkerWin::isRunning() const
+bool ETRunWorker::isRunning() const
 {
     return m_process && m_process->state() == QProcess::Running;
 }
 
-void ETRunWorkerWin::setState(State newState)
+void ETRunWorker::setState(State newState)
 {
     if (m_state == newState) {
         return;
@@ -174,7 +174,7 @@ void ETRunWorkerWin::setState(State newState)
     emit stateChanged(newState, oldState);
 }
 
-QStringList ETRunWorkerWin::buildArguments(const QString &connectionKey)
+QStringList ETRunWorker::buildArguments(const QString &connectionKey)
 {
     // Qt获取设备主机名
     const QString &hostname = QSysInfo::machineHostName();
@@ -186,20 +186,20 @@ QStringList ETRunWorkerWin::buildArguments(const QString &connectionKey)
     return args;
 }
 
-QString ETRunWorkerWin::getExecutablePath() const
+QString ETRunWorker::getExecutablePath() const
 {
     QString appDir = QCoreApplication::applicationDirPath();
     QString exePath = QDir::toNativeSeparators(appDir + "/etcore/easytier-core.exe");
     return exePath;
 }
 
-QString ETRunWorkerWin::getWorkingDirectory() const
+QString ETRunWorker::getWorkingDirectory() const
 {
     QString appDir = QCoreApplication::applicationDirPath();
     return QDir::toNativeSeparators(appDir + "/etcore");
 }
 
-void ETRunWorkerWin::terminateProcess()
+void ETRunWorker::terminateProcess()
 {
     if (m_process && m_process->state() != QProcess::NotRunning) {
         qDebug() << "正在优雅停止 EasyTier 进程...";
@@ -207,7 +207,7 @@ void ETRunWorkerWin::terminateProcess()
     }
 }
 
-void ETRunWorkerWin::killProcess()
+void ETRunWorker::killProcess()
 {
     if (m_process && m_process->state() != QProcess::NotRunning) {
         qDebug() << "正在强制终止 EasyTier 进程...";
@@ -215,7 +215,7 @@ void ETRunWorkerWin::killProcess()
     }
 }
 
-void ETRunWorkerWin::onProcessStarted()
+void ETRunWorker::onProcessStarted()
 {
     qDebug() << "EasyTier 进程已启动，等待 Successful 标志...";
     
@@ -223,7 +223,7 @@ void ETRunWorkerWin::onProcessStarted()
     // 不停止启动超时定时器，继续等待 Successful 输出
 }
 
-void ETRunWorkerWin::onProcessError(QProcess::ProcessError error)
+void ETRunWorker::onProcessError(QProcess::ProcessError error)
 {
     qDebug() << "进程错误:" << error;
     
@@ -264,7 +264,7 @@ void ETRunWorkerWin::onProcessError(QProcess::ProcessError error)
     emit startFailed(errorMsg);
 }
 
-void ETRunWorkerWin::onProcessReadyReadStandardOutput()
+void ETRunWorker::onProcessReadyReadStandardOutput()
 {
     QByteArray data = m_process->readAllStandardOutput();
     QString output = QString::fromUtf8(data).trimmed();
@@ -290,7 +290,7 @@ void ETRunWorkerWin::onProcessReadyReadStandardOutput()
     }
 }
 
-void ETRunWorkerWin::onProcessReadyReadStandardError()
+void ETRunWorker::onProcessReadyReadStandardError()
 {
     QByteArray data = m_process->readAllStandardError();
     QString error = QString::fromUtf8(data).trimmed();
@@ -301,7 +301,7 @@ void ETRunWorkerWin::onProcessReadyReadStandardError()
     }
 }
 
-void ETRunWorkerWin::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
+void ETRunWorker::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     qDebug() << "进程结束: exitCode=" << exitCode << ", exitStatus=" << exitStatus;
     
@@ -340,7 +340,7 @@ void ETRunWorkerWin::onProcessFinished(int exitCode, QProcess::ExitStatus exitSt
     }
 }
 
-void ETRunWorkerWin::onStartTimeout()
+void ETRunWorker::onStartTimeout()
 {
     qDebug() << "启动超时";
     
@@ -353,7 +353,7 @@ void ETRunWorkerWin::onStartTimeout()
     emit startFailed("启动超时，请检查网络连接和配置");
 }
 
-void ETRunWorkerWin::onStopTimeout()
+void ETRunWorker::onStopTimeout()
 {
     qDebug() << "停止超时，强制终止进程";
     

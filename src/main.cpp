@@ -36,12 +36,10 @@ int main(int argc, char *argv[])
     
     bool isAutoStart = parser.isSet(autoStartOption);
     
-    // 创建系统托盘
-    SystemTray *tray = new SystemTray();
-    tray->setAutoStartMode(isAutoStart);
-    tray->show();
+    // 创建系统托盘（使用栈对象自动管理生命周期）
+    SystemTray tray;
+    tray.setAutoStartMode(isAutoStart);
+    tray.show();
 
-    int result = app.exec();
-
-    return result;
+    return app.exec();
 }

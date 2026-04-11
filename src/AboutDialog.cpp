@@ -63,7 +63,7 @@ void AboutDialog::setupUI()
     mainLayout->addWidget(m_copyrightLabel);
     
     // 按钮
-    QHBoxLayout *buttonLayout = new QHBoxLayout(this);
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch();
     
     m_okButton = new QPushButton("确定", this);

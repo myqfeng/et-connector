@@ -56,7 +56,11 @@ template <> constexpr inline auto SystemTray::qt_create_metaobjectdata<qt_meta_t
         "onEasyTierStartFailed",
         "error",
         "onEasyTierStopped",
-        "onEasyTierStopFailed"
+        "onEasyTierCrashed",
+        "onApplicationQuit",
+        "onConnectionKeyChanged",
+        "createScheduledTask",
+        "deleteScheduledTask"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -75,9 +79,9 @@ template <> constexpr inline auto SystemTray::qt_create_metaobjectdata<qt_meta_t
             { QMetaType::Bool, 6 },
         }}),
         // Slot 'onAbout'
-        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void() const>(8, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onQuit'
-        QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void() const>(9, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onTrayActivated'
         QtMocHelpers::SlotData<void(QSystemTrayIcon::ActivationReason)>(10, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { 0x80000000 | 11, 12 },
@@ -90,10 +94,18 @@ template <> constexpr inline auto SystemTray::qt_create_metaobjectdata<qt_meta_t
         }}),
         // Slot 'onEasyTierStopped'
         QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onEasyTierStopFailed'
+        // Slot 'onEasyTierCrashed'
         QtMocHelpers::SlotData<void(const QString &)>(17, 2, QMC::AccessPrivate, QMetaType::Void, {{
             { QMetaType::QString, 15 },
         }}),
+        // Slot 'onApplicationQuit'
+        QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onConnectionKeyChanged'
+        QtMocHelpers::SlotData<void()>(19, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'createScheduledTask'
+        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'deleteScheduledTask'
+        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -128,7 +140,11 @@ void SystemTray::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 8: _t->onEasyTierStarted(); break;
         case 9: _t->onEasyTierStartFailed((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 10: _t->onEasyTierStopped(); break;
-        case 11: _t->onEasyTierStopFailed((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 11: _t->onEasyTierCrashed((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 12: _t->onApplicationQuit(); break;
+        case 13: _t->onConnectionKeyChanged(); break;
+        case 14: _t->createScheduledTask(); break;
+        case 15: _t->deleteScheduledTask(); break;
         default: ;
         }
     }
@@ -153,14 +169,14 @@ int SystemTray::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 16)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 16;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 16)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 12;
+        _id -= 16;
     }
     return _id;
 }

@@ -72,6 +72,14 @@ void SettingsDialog::setConnectionKey(const QString &key)
 
 void SettingsDialog::accept()
 {
+    // 验证输入
+    QString key = m_keyEdit->text().trimmed();
+    if (key.isEmpty()) {
+        m_keyEdit->setFocus();
+        m_keyEdit->setPlaceholderText("请输入连接地址与密钥");
+        return;
+    }
+    
     emit connectionKeyChanged();
     QDialog::accept();
 }

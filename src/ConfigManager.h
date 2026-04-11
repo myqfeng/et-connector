@@ -43,7 +43,10 @@ private:
     QString m_configFilePath;
     
     // 确保配置目录存在
-    void ensureConfigDirectory(const QString &basePath = QString());
+    void ensureConfigDirectory(const QString &basePath);
+    
+    // 获取基础配置路径
+    QString getBaseConfigPath() const;
 };
 
 #endif // CONFIGMANAGER_H

@@ -17,7 +17,7 @@
  *      +----------+          +-----------+
  *         (失败)                (停止)
  */
-class ETRunWorkerWin : public QObject
+class ETRunWorker : public QObject
 {
     Q_OBJECT
 
@@ -30,8 +30,8 @@ public:
         Stopping     // 停止中
     };
 
-    explicit ETRunWorkerWin(QObject *parent = nullptr);
-    ~ETRunWorkerWin();
+    explicit ETRunWorker(QObject *parent = nullptr);
+    ~ETRunWorker();
     
     // 启动 EasyTier Core
     void start(const QString &connectionKey);

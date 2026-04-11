@@ -111,7 +111,7 @@ private:
     AboutDialog *m_aboutDialog;
     
     // EasyTier进程管理器
-    ETRunWorkerWin *m_etWorker;
+    ETRunWorker *m_etWorker;
     
     // 配置管理器
     ConfigManager *m_configManager;

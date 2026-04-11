@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_RC
-  "C:/Users/YMHuang/Desktop/et-web-connector/build/app.rc" "C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector.dir/app.rc.obj"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/app.rc" "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector.dir/app.rc.obj"
   )
 
 # Preprocessor definitions for this target.
@@ -16,6 +16,7 @@ set(CMAKE_TARGET_DEFINITIONS_RC
   "QT_CORE_LIB"
   "QT_GUI_LIB"
   "QT_NEEDS_QMAIN"
+  "QT_NO_DEBUG"
   "QT_WIDGETS_LIB"
   "UNICODE"
   "WIN32"
@@ -40,14 +41,14 @@ set(CMAKE_RC_TARGET_INCLUDE_PATH
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "" "EasyTierConnector_autogen/timestamp" "custom" "EasyTierConnector_autogen/deps"
-  "C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector_autogen/mocs_compilation.cpp" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/AboutDialog.cpp" "CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/ConfigManager.cpp" "CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/ETRunWorkerWin.cpp" "CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/SettingsDialog.cpp" "CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/SystemTray.cpp" "CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj.d"
-  "C:/Users/YMHuang/Desktop/et-web-connector/src/main.cpp" "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/EasyTierConnector_autogen/mocs_compilation.cpp" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/AboutDialog.cpp" "CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/ConfigManager.cpp" "CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/ETRunWorkerWin.cpp" "CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/SettingsDialog.cpp" "CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/SystemTray.cpp" "CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj.d"
+  "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/main.cpp" "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj" "gcc" "CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

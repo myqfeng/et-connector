@@ -99,24 +99,28 @@ install(TARGETS ${PROJECT_NAME}
 
 # Windows特定：复制etcore文件夹到输出目录和安装目录
 if(WIN32)
-    # 定义etcore源目录和目标目录
+    # 定义etcore源目录
     set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore")
-    set(ETCORE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/etcore")
-    set(ETCORE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/etcore")
     
     # 添加自定义命令：在构建时复制etcore文件夹到输出目录
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${ETCORE_SOURCE_DIR}
-        ${ETCORE_OUTPUT_DIR}
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/etcore
         COMMENT "复制etcore文件夹到输出目录"
     )
     
-    # 添加自定义命令：在安装时复制etcore文件夹到安装目录
-    install(DIRECTORY ${ETCORE_SOURCE_DIR}/
-        DESTINATION ${ETCORE_INSTALL_DIR}
-        USE_SOURCE_PERMISSIONS
-    )
+    # 安装etcore目录
+    install(CODE "
+        message(STATUS \"部署etcore...\")
+        # 获取安装目录的绝对路径
+        get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
+                \"${ETCORE_SOURCE_DIR}\"
+                \"\${INSTALL_ABS_PATH}/bin/etcore\"
+        )
+    ")
 endif()
 
 # 安装时使用windeployqt部署Qt运行时
@@ -129,14 +133,17 @@ if(WIN32)
     if(WINDEPLOYQT_EXECUTABLE)
         install(CODE "
             message(STATUS \"使用windeployqt部署Qt运行时...\")
+            # 获取安装目录的绝对路径
+            get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+            set(EXE_PATH \"\${INSTALL_ABS_PATH}/${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}.exe\")
             execute_process(
                 COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"
                     --no-quick
                     --no-system-d3d-compiler
                     --no-translations
                     --no-opengl-sw
-                    \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}.exe\"
-                WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\"
+                    \"\${EXE_PATH}\"
+                WORKING_DIRECTORY \"\${INSTALL_ABS_PATH}/${CMAKE_INSTALL_BINDIR}\"
                 RESULT_VARIABLE deploy_result
             )
             if(NOT deploy_result EQUAL 0)

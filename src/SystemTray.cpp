@@ -99,15 +99,15 @@ SystemTray::SystemTray(QObject *parent)
     qDebug() << "AboutDialog 创建完成";
     
     // 初始化EasyTier进程管理器
-    m_etWorker = new ETRunWorkerWin(this);
-    qDebug() << "ETRunWorkerWin 创建完成";
+    m_etWorker = new ETRunWorker(this);
+    qDebug() << "ETRunWorker 创建完成";
     
     // 连接EasyTier进程管理器信号
-    connect(m_etWorker, &ETRunWorkerWin::started, 
+    connect(m_etWorker, &ETRunWorker::started, 
             this, &SystemTray::onEasyTierStarted);
-    connect(m_etWorker, &ETRunWorkerWin::startFailed, 
+    connect(m_etWorker, &ETRunWorker::startFailed, 
             this, &SystemTray::onEasyTierStartFailed);
-    connect(m_etWorker, &ETRunWorkerWin::stopped, 
+    connect(m_etWorker, &ETRunWorker::stopped, 
             this, &SystemTray::onEasyTierStopped);
     
     // 连接应用退出信号，确保退出前停止进程
@@ -146,11 +146,16 @@ SystemTray::~SystemTray()
         m_configManager->saveConfig();
         saveSettings();
 
-        delete m_etWorker;
+        // 注意：m_etWorker 和 m_configManager 已设置 this 为父对象，Qt 会自动删除
+        // 只需删除没有父对象的对象
         delete m_settingsDialog;
+        m_settingsDialog = nullptr;
         delete m_aboutDialog;
+        m_aboutDialog = nullptr;
         delete m_progressDialog;
+        m_progressDialog = nullptr;
         delete m_stopProgressDialog;
+        m_stopProgressDialog = nullptr;
 
     }
     catch (const std::exception& e) {
@@ -370,16 +375,15 @@ void SystemTray::onAutoStart(bool checked)
 
 void SystemTray::createScheduledTask()
 {
-    // 获取程序路径
-    const QString &appPath = QApplication::applicationFilePath();
-    const QString &appName = "EasyTierConnector";
+    // 获取程序路径并添加引号保护（防止路径包含空格或特殊字符）
+    const QString appPath = QString("\"%1\"").arg(QApplication::applicationFilePath());
+    const QString appName = "EasyTierConnector";
     
     // 构建参数列表
     QStringList args;
     args << "/create"
          << "/tn" << appName
          << "/tr" << appPath
-//         << "/sd" << QCoreApplication::applicationDirPath()
          << "/sc" << "onlogon"
          << "/rl" << "highest"
          << "/f";
@@ -572,21 +576,21 @@ void SystemTray::onConnectionKeyChanged()
     m_configManager->saveConfig();
     
     // 获取进程实际状态
-    ETRunWorkerWin::State workerState = m_etWorker->state();
+    ETRunWorker::State workerState = m_etWorker->state();
     
     switch (workerState) {
-    case ETRunWorkerWin::State::NotStarted:
+    case ETRunWorker::State::NotStarted:
         // 进程未运行，直接启动连接
         onToggleConnection();
         break;
         
-    case ETRunWorkerWin::State::Stopping:
+    case ETRunWorker::State::Stopping:
         // 进程正在停止中，设置标志等待停止完成后重新连接
         m_reconnectAfterStop = true;
         break;
         
-    case ETRunWorkerWin::State::Starting:
-    case ETRunWorkerWin::State::Running:
+    case ETRunWorker::State::Starting:
+    case ETRunWorker::State::Running:
         // 进程正在启动或运行中，先停止再重新连接
         m_reconnectAfterStop = true;
         showStopProgressDialog();

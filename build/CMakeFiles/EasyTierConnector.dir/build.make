@@ -52,10 +52,10 @@ RM = C:\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\YMHuang\Desktop\et-web-connector
+CMAKE_SOURCE_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\YMHuang\Desktop\et-web-connector\build
+CMAKE_BINARY_DIR = E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/EasyTierConnector.dir/depend.make
@@ -71,153 +71,153 @@ include CMakeFiles/EasyTierConnector.dir/flags.make
 EasyTierConnector_autogen/timestamp: C:/Qt/6.10.1/llvm-mingw_64/bin/moc.exe
 EasyTierConnector_autogen/timestamp: C:/Qt/6.10.1/llvm-mingw_64/bin/uic.exe
 EasyTierConnector_autogen/timestamp: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target EasyTierConnector"
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autogen C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutogenInfo.json Debug
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector_autogen/timestamp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target EasyTierConnector"
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autogen E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutogenInfo.json ""
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E touch E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/EasyTierConnector_autogen/timestamp
 
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/resources.qrc
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/resources.qrc
 EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: CMakeFiles/EasyTierConnector_autogen.dir/AutoRcc_resources_EWIEGA46WW_Info.json
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/status-green.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/status-red.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/settings.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/webconsole.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/connect.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/favicon.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/startup.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/autoconnect.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/disconnect.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/about.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/status-yellow.svg
-EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Users/YMHuang/Desktop/et-web-connector/assets/quit.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/status-green.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/status-red.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/settings.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/webconsole.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/connect.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/favicon.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/startup.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/autoconnect.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/disconnect.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/about.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/status-yellow.svg
+EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/quit.svg
 EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Qt/6.10.1/llvm-mingw_64/bin/rcc.exe
 EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp: C:/Qt/6.10.1/llvm-mingw_64/bin/rcc.exe
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Automatic RCC for resources.qrc"
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autorcc C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutoRcc_resources_EWIEGA46WW_Info.json Debug
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Automatic RCC for resources.qrc"
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autorcc E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir/AutoRcc_resources_EWIEGA46WW_Info.json 
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj: EasyTierConnector_autogen/mocs_compilation.cpp
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp > CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp > CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/mocs_compilation.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\mocs_compilation.cpp -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\mocs_compilation.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/main.cpp
+CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/main.cpp
 CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\main.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\main.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/main.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\main.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\main.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\main.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/main.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\main.cpp > CMakeFiles\EasyTierConnector.dir\src\main.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\main.cpp > CMakeFiles\EasyTierConnector.dir\src\main.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/main.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\main.cpp -o CMakeFiles\EasyTierConnector.dir\src\main.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\main.cpp -o CMakeFiles\EasyTierConnector.dir\src\main.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/SystemTray.cpp
+CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/SystemTray.cpp
 CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\SystemTray.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SystemTray.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\SystemTray.cpp > CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SystemTray.cpp > CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/SystemTray.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\SystemTray.cpp -o CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SystemTray.cpp -o CMakeFiles\EasyTierConnector.dir\src\SystemTray.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/SettingsDialog.cpp
+CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/SettingsDialog.cpp
 CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\SettingsDialog.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SettingsDialog.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\SettingsDialog.cpp > CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SettingsDialog.cpp > CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/SettingsDialog.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\SettingsDialog.cpp -o CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\SettingsDialog.cpp -o CMakeFiles\EasyTierConnector.dir\src\SettingsDialog.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/AboutDialog.cpp
+CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/AboutDialog.cpp
 CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\AboutDialog.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\AboutDialog.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\AboutDialog.cpp > CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\AboutDialog.cpp > CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/AboutDialog.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\AboutDialog.cpp -o CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\AboutDialog.cpp -o CMakeFiles\EasyTierConnector.dir\src\AboutDialog.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/ETRunWorkerWin.cpp
+CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/ETRunWorkerWin.cpp
 CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\ETRunWorkerWin.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ETRunWorkerWin.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\ETRunWorkerWin.cpp > CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ETRunWorkerWin.cpp > CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/ETRunWorkerWin.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\ETRunWorkerWin.cpp -o CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ETRunWorkerWin.cpp -o CMakeFiles\EasyTierConnector.dir\src\ETRunWorkerWin.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
-CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj: C:/Users/YMHuang/Desktop/et-web-connector/src/ConfigManager.cpp
+CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj: E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/src/ConfigManager.cpp
 CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\src\ConfigManager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ConfigManager.cpp
 
 CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\src\ConfigManager.cpp > CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ConfigManager.cpp > CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/src/ConfigManager.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\src\ConfigManager.cpp -o CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\src\ConfigManager.cpp -o CMakeFiles\EasyTierConnector.dir\src\ConfigManager.cpp.s
 
 CMakeFiles/EasyTierConnector.dir/app.rc.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/app.rc.obj: app.rc
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building RC object CMakeFiles/EasyTierConnector.dir/app.rc.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\windres.exe -O coff $(RC_DEFINES) $(RC_INCLUDES) $(RC_FLAGS) C:\Users\YMHuang\Desktop\et-web-connector\build\app.rc CMakeFiles\EasyTierConnector.dir\app.rc.obj
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building RC object CMakeFiles/EasyTierConnector.dir/app.rc.obj"
+	C:\Qt\Tools\mingw1310_64\bin\windres.exe -O coff $(RC_DEFINES) $(RC_INCLUDES) $(RC_FLAGS) E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\app.rc CMakeFiles\EasyTierConnector.dir\app.rc.obj
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj: CMakeFiles/EasyTierConnector.dir/flags.make
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj: CMakeFiles/EasyTierConnector.dir/includes_CXX.rsp
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj: EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj: CMakeFiles/EasyTierConnector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.obj -c C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj"
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.obj -MF CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.obj.d -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.obj -c E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.i"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp > CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.i
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp > CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.i
 
 CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/EasyTierConnector.dir/EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp.s"
-	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\YMHuang\Desktop\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.s
+	C:\Qt\Tools\llvm-mingw1706_64\bin\clang++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp -o CMakeFiles\EasyTierConnector.dir\EasyTierConnector_autogen\EWIEGA46WW\qrc_resources.cpp.s
 
 # Object files for target EasyTierConnector
 EasyTierConnector_OBJECTS = \
@@ -251,10 +251,10 @@ EasyTierConnector.exe: C:/Qt/6.10.1/llvm-mingw_64/lib/libQt6EntryPoint.a
 EasyTierConnector.exe: CMakeFiles/EasyTierConnector.dir/linkLibs.rsp
 EasyTierConnector.exe: CMakeFiles/EasyTierConnector.dir/objects1.rsp
 EasyTierConnector.exe: CMakeFiles/EasyTierConnector.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable EasyTierConnector.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable EasyTierConnector.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\EasyTierConnector.dir\link.txt --verbose=$(VERBOSE)
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold 复制etcore文件夹到输出目录
-	C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_directory C:/Users/YMHuang/Desktop/et-web-connector/etcore C:/Users/YMHuang/Desktop/et-web-connector/build/etcore
+	C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_directory E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/etcore E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/etcore
 
 # Rule to build all files generated by this target.
 CMakeFiles/EasyTierConnector.dir/build: EasyTierConnector.exe
@@ -266,6 +266,6 @@ CMakeFiles/EasyTierConnector.dir/clean:
 
 CMakeFiles/EasyTierConnector.dir/depend: EasyTierConnector_autogen/EWIEGA46WW/qrc_resources.cpp
 CMakeFiles/EasyTierConnector.dir/depend: EasyTierConnector_autogen/timestamp
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build C:\Users\YMHuang\Desktop\et-web-connector\build\CMakeFiles\EasyTierConnector.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\build\CMakeFiles\EasyTierConnector.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/EasyTierConnector.dir/depend
 

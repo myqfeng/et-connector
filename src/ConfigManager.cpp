@@ -13,19 +13,8 @@ ConfigManager::ConfigManager(QObject *parent)
     , m_autoStart(false)
     , m_autoReconnect(true) // 默认启用自动回连
 {
-    // 获取配置文件路径 - 使用标准的配置目录
-    QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QDir::currentPath();
-    }
+    // 获取配置文件路径
+    QString configPath = getBaseConfigPath();
     
     // 创建EasyTier配置目录
     ensureConfigDirectory(configPath);
@@ -81,19 +70,7 @@ void ConfigManager::setAutoReconnect(bool autoReconnect)
 bool ConfigManager::saveConfig()
 {
     // 获取配置路径
-    QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QDir::currentPath();
-    }
-    
+    QString configPath = getBaseConfigPath();
     ensureConfigDirectory(configPath);
     
     QJsonObject configObj;
@@ -117,19 +94,7 @@ bool ConfigManager::saveConfig()
 bool ConfigManager::loadConfig()
 {
     // 获取配置路径
-    QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    }
-    
-    if (configPath.isEmpty()) {
-        configPath = QDir::currentPath();
-    }
-    
+    QString configPath = getBaseConfigPath();
     ensureConfigDirectory(configPath);
     
     QFile configFile(m_configFilePath);
@@ -153,4 +118,28 @@ bool ConfigManager::loadConfig()
 QString ConfigManager::getConfigFilePath() const
 {
     return m_configFilePath;
+}
+
+QString ConfigManager::getBaseConfigPath() const
+{
+    // 尝试使用标准的配置目录
+    QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    if (!configPath.isEmpty()) {
+        return configPath;
+    }
+    
+    // 备选：AppDataLocation
+    configPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (!configPath.isEmpty()) {
+        return configPath;
+    }
+    
+    // 备选：GenericDataLocation
+    configPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    if (!configPath.isEmpty()) {
+        return configPath;
+    }
+    
+    // 最后备选：当前目录
+    return QDir::currentPath();
 }
