@@ -1,8 +1,0 @@
-// 自动生成的资源文件
-#include <windows.h>
-
-// 应用程序图标
-IDI_ICON1   ICON    "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/assets/favicon.ico"
-
-// 应用程序清单
-1   RT_MANIFEST   "E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/app.manifest"

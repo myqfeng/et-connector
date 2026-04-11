@@ -1,9 +1,0 @@
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/edit_cache.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/rebuild_cache.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/list_install_components.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/install.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/install/local.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/install/strip.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir
-E:/YMHuang/Programs_Code/CPP_Qt/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir
