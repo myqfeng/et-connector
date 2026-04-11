@@ -1,0 +1,9 @@
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/edit_cache.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/rebuild_cache.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/list_install_components.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/install.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/install/local.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/install/strip.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen_timestamp_deps.dir
+C:/Users/YMHuang/Desktop/et-web-connector/build/CMakeFiles/EasyTierConnector_autogen.dir

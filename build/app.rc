@@ -1,0 +1,8 @@
+// 自动生成的资源文件
+#include <windows.h>
+
+// 应用程序图标
+IDI_ICON1   ICON    "C:/Users/YMHuang/Desktop/et-web-connector/assets/favicon.ico"
+
+// 应用程序清单
+1   RT_MANIFEST   "C:/Users/YMHuang/Desktop/et-web-connector/app.manifest"

@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-9a398359f66a8a156ff4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "EasyTierConnector",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "EasyTierConnector::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-EasyTierConnector-Debug-4ed26e4868692d601cfb.json",
+					"name" : "EasyTierConnector",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "EasyTierConnector_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-EasyTierConnector_autogen-Debug-2cca909b5a959483ad29.json",
+					"name" : "EasyTierConnector_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "EasyTierConnector_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-EasyTierConnector_autogen_timestamp_deps-Debug-b48072d07aa9a8e35339.json",
+					"name" : "EasyTierConnector_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/YMHuang/Desktop/et-web-connector/build",
+		"source" : "C:/Users/YMHuang/Desktop/et-web-connector"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

@@ -1,0 +1,1 @@
+-I"C:/Users/YMHuang/Desktop/et-web-connector/build/EasyTierConnector_autogen/include" -isystem "C:/Qt/6.10.1/llvm-mingw_64/include/QtCore" -isystem "C:/Qt/6.10.1/llvm-mingw_64/include" -isystem "C:/Qt/6.10.1/llvm-mingw_64/mkspecs/win32-clang-g++" -isystem "C:/Qt/6.10.1/llvm-mingw_64/include/QtGui" -isystem "C:/Qt/6.10.1/llvm-mingw_64/include/QtWidgets"

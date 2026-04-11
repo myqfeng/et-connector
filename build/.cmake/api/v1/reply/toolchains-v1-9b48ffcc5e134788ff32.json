@@ -1,0 +1,85 @@
+{
+	"kind" : "toolchains",
+	"toolchains" : 
+	[
+		{
+			"compiler" : 
+			{
+				"id" : "Clang",
+				"implicit" : 
+				{
+					"includeDirectories" : 
+					[
+						"C:/Qt/Tools/llvm-mingw1706_64/include/c++/v1",
+						"C:/Qt/Tools/llvm-mingw1706_64/lib/clang/21/include",
+						"C:/Qt/Tools/llvm-mingw1706_64/include"
+					],
+					"linkDirectories" : 
+					[
+						"C:/Qt/Tools/llvm-mingw1706_64/x86_64-w64-mingw32/lib",
+						"C:/Qt/Tools/llvm-mingw1706_64/x86_64-w64-mingw32/mingw/lib",
+						"C:/Qt/Tools/llvm-mingw1706_64/lib",
+						"C:/Qt/Tools/llvm-mingw1706_64/lib/clang/21/lib/windows"
+					],
+					"linkFrameworkDirectories" : [],
+					"linkLibraries" : 
+					[
+						"c++",
+						"mingw32",
+						"unwind",
+						"moldname",
+						"mingwex",
+						"advapi32",
+						"shell32",
+						"user32",
+						"kernel32",
+						"mingw32",
+						"unwind",
+						"moldname",
+						"mingwex",
+						"kernel32"
+					]
+				},
+				"path" : "C:/Qt/Tools/llvm-mingw1706_64/bin/clang++.exe",
+				"version" : "21.1.7"
+			},
+			"language" : "CXX",
+			"sourceFileExtensions" : 
+			[
+				"C",
+				"M",
+				"c++",
+				"cc",
+				"cpp",
+				"cxx",
+				"m",
+				"mm",
+				"mpp",
+				"CPP",
+				"ixx",
+				"cppm",
+				"ccm",
+				"cxxm",
+				"c++m"
+			]
+		},
+		{
+			"compiler" : 
+			{
+				"implicit" : {},
+				"path" : "C:/Qt/Tools/llvm-mingw1706_64/bin/windres.exe"
+			},
+			"language" : "RC",
+			"sourceFileExtensions" : 
+			[
+				"rc",
+				"RC"
+			]
+		}
+	],
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}
