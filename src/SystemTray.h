@@ -5,8 +5,6 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
-#include <QSettings>
-#include <QMessageBox>
 #include <QProgressDialog>
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
