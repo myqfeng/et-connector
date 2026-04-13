@@ -8,9 +8,7 @@ endif()
 project(EasyTierConnector VERSION 1.0.0 LANGUAGES CXX)
 
 # 设置默认安装目录为项目根目录的Install文件夹
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
-endif()
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,6 +27,8 @@ set(SOURCES
     src/AboutDialog.cpp
     src/ETRunWorkerWin.cpp
     src/ConfigManager.cpp
+        src/ETRunService.cpp
+        src/ETRunService.h
 )
 
 # 头文件

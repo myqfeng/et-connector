@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     app.setFont(defaultFont);
     
     app.setApplicationName("EasyTier Connector");
-    app.setApplicationVersion("0.0.1");
+    app.setApplicationVersion("0.0.2");
     app.setQuitOnLastWindowClosed(false); // 关闭窗口时不退出应用
     
     // 解析命令行参数

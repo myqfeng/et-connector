@@ -90,14 +90,7 @@ SystemTray::SystemTray(QObject *parent)
     connect(m_trayIcon, &QSystemTrayIcon::activated, 
             this, &SystemTray::onTrayActivated);
     qDebug() << "信号连接完成";
-    
-    // 初始化对话框
-    m_settingsDialog = new SettingsDialog(m_connectionKey);
-    qDebug() << "SettingsDialog 创建完成";
-    
-    m_aboutDialog = new AboutDialog();
-    qDebug() << "AboutDialog 创建完成";
-    
+
     // 初始化EasyTier进程管理器
     m_etWorker = new ETRunWorker(this);
     qDebug() << "ETRunWorker 创建完成";
@@ -113,10 +106,6 @@ SystemTray::SystemTray(QObject *parent)
     // 连接应用退出信号，确保退出前停止进程
     connect(qApp, &QApplication::aboutToQuit, 
             this, &SystemTray::onApplicationQuit);
-
-    // 连接设置对话框的密钥更新信号，实现修改后自动连接
-    connect(m_settingsDialog, &SettingsDialog::connectionKeyChanged,
-            this, &SystemTray::onConnectionKeyChanged);
     
     // 检查是否需要自动回连
     if (m_autoReconnect && !m_connectionKey.isEmpty()) {
@@ -147,15 +136,23 @@ SystemTray::~SystemTray()
         saveSettings();
 
         // 注意：m_etWorker 和 m_configManager 已设置 this 为父对象，Qt 会自动删除
-        // 只需删除没有父对象的对象
-        delete m_settingsDialog;
-        m_settingsDialog = nullptr;
-        delete m_aboutDialog;
-        m_aboutDialog = nullptr;
-        delete m_progressDialog;
-        m_progressDialog = nullptr;
-        delete m_stopProgressDialog;
-        m_stopProgressDialog = nullptr;
+        // 只需删除没有父对象的对象（对话框可能已在关闭时被销毁）
+        if (m_settingsDialog != nullptr) {
+            delete m_settingsDialog;
+            m_settingsDialog = nullptr;
+        }
+        if (m_aboutDialog != nullptr) {
+            delete m_aboutDialog;
+            m_aboutDialog = nullptr;
+        }
+        if (m_progressDialog != nullptr) {
+            delete m_progressDialog;
+            m_progressDialog = nullptr;
+        }
+        if (m_stopProgressDialog != nullptr) {
+            delete m_stopProgressDialog;
+            m_stopProgressDialog = nullptr;
+        }
 
     }
     catch (const std::exception& e) {
@@ -213,7 +210,12 @@ void SystemTray::setupMenu()
     m_menu->addAction(m_openWebConsoleAction);
     
     // 设置连接地址密钥
-    m_settingsAction = new QAction(QIcon(":/assets/settings.svg"), "设置连接地址密钥", this);
+#ifdef IS_NOT_ET_PRO
+    const QString settingsText = "设置连接地址与用户名";
+#else
+    const QString settingsText = "设置连接地址与密钥";
+#endif
+       m_settingsAction = new QAction(QIcon(":/assets/settings.svg"), settingsText, this);
     connect(m_settingsAction, &QAction::triggered, 
             this, &SystemTray::onSettings);
     m_menu->addAction(m_settingsAction);
@@ -269,7 +271,7 @@ void SystemTray::updateStatus(ConnectionState state)
         statusIcon = ":/assets/status-red.svg";
         break;
     case ConnectionState::Connecting:
-        statusText = "状态：连接中";
+        statusText = "状态：Waiting";
         tooltipText = "EasyTier 控制台连接器 - 连接中";
         statusIcon = ":/assets/status-yellow.svg";
         break;
@@ -349,12 +351,24 @@ void SystemTray::onOpenWebConsole()
 
 void SystemTray::onSettings()
 {
+    // 懒加载：打开时创建对话框
+    if (m_settingsDialog == nullptr) {
+        m_settingsDialog = new SettingsDialog(m_connectionKey);
+        // 连接设置对话框的密钥更新信号，实现修改后自动连接
+        connect(m_settingsDialog, &SettingsDialog::connectionKeyChanged,
+                this, &SystemTray::onConnectionKeyChanged);
+    }
+    
     m_settingsDialog->setConnectionKey(m_connectionKey);
     if (m_settingsDialog->exec() == QDialog::Accepted) {
         m_connectionKey = m_settingsDialog->getConnectionKey();
         m_configManager->setConnectionKey(m_connectionKey);
         m_configManager->saveConfig();
     }
+    
+    // 关闭后销毁对话框，释放内存
+    m_settingsDialog->deleteLater();
+    m_settingsDialog = nullptr;
 }
 
 void SystemTray::onAutoStart(bool checked)
@@ -427,9 +441,18 @@ void SystemTray::onAutoReconnect(bool checked)
     m_configManager->saveConfig();
 }
 
-void SystemTray::onAbout() const
+void SystemTray::onAbout()
 {
+    // 懒加载：打开时创建对话框
+    if (m_aboutDialog == nullptr) {
+        m_aboutDialog = new AboutDialog();
+    }
+    
     m_aboutDialog->exec();
+    
+    // 关闭后销毁对话框，释放内存
+    m_aboutDialog->deleteLater();
+    m_aboutDialog = nullptr;
 }
 
 void SystemTray::onQuit() const
@@ -570,6 +593,12 @@ void SystemTray::onApplicationQuit()
 
 void SystemTray::onConnectionKeyChanged()
 {
+    // 检查对话框是否存在（信号由对话框发出，正常情况下对话框存在）
+    if (m_settingsDialog == nullptr) {
+        qDebug() << "onConnectionKeyChanged: m_settingsDialog 为空，忽略";
+        return;
+    }
+    
     // 更新连接密钥
     m_connectionKey = m_settingsDialog->getConnectionKey();
     m_configManager->setConnectionKey(m_connectionKey);

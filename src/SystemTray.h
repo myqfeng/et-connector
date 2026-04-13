@@ -13,7 +13,7 @@
 #include "ETRunWorkerWin.h"
 #include "ConfigManager.h"
 
-#define IS_NOT_ET_PRO
+//#define IS_NOT_ET_PRO
 
 // 连接状态枚举
 enum class ConnectionState {
@@ -39,7 +39,7 @@ private slots:
     void onSettings();
     void onAutoStart(bool checked);
     void onAutoReconnect(bool checked);
-    void onAbout() const;
+    void onAbout();
     void onQuit() const;
     static void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     
@@ -106,9 +106,9 @@ private:
     // 设置
     QSettings *m_settings;
     
-    // 对话框
-    SettingsDialog *m_settingsDialog;
-    AboutDialog *m_aboutDialog;
+    // 对话框 (懒加载)
+    SettingsDialog *m_settingsDialog = nullptr;
+    AboutDialog *m_aboutDialog = nullptr;
     
     // EasyTier进程管理器
     ETRunWorker *m_etWorker;
