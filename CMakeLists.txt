@@ -25,10 +25,8 @@ set(SOURCES
     src/SystemTray.cpp
     src/SettingsDialog.cpp
     src/AboutDialog.cpp
-    src/ETRunWorkerWin.cpp
+    src/ETRunService.cpp
     src/ConfigManager.cpp
-        src/ETRunService.cpp
-        src/ETRunService.h
 )
 
 # 头文件
@@ -36,7 +34,7 @@ set(HEADERS
     src/SystemTray.h
     src/SettingsDialog.h
     src/AboutDialog.h
-    src/ETRunWorkerWin.h
+    src/ETRunService.h
     src/ConfigManager.h
 )
 
@@ -57,6 +55,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    Qt6::Network
 )
 
 # Windows特定设置

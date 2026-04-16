@@ -3,6 +3,9 @@
 #include <QFont>
 #include <QThread>
 #include <QCommandLineParser>
+#include <QLocalSocket>
+#include <QLocalServer>
+#include <QMessageBox>
 #include "SystemTray.h"
 
 int main(int argc, char *argv[])
@@ -16,8 +19,26 @@ int main(int argc, char *argv[])
     app.setFont(defaultFont);
     
     app.setApplicationName("EasyTier Connector");
-    app.setApplicationVersion("0.0.3");
+    app.setApplicationVersion("0.0.4");
     app.setQuitOnLastWindowClosed(false); // 关闭窗口时不退出应用
+    
+    // 单实例检测：尝试连接已存在的本地套接字
+    const QString &serverName = "QtETWebConnector-By-Myqfeng";
+    QLocalSocket checkSocket;
+    checkSocket.connectToServer(serverName, QIODevice::WriteOnly);
+    
+    if (checkSocket.waitForConnected(500)) {
+        // 连接成功，说明已有实例运行
+        checkSocket.disconnectFromServer();
+        QMessageBox::information(nullptr, "EasyTier Connector", "程序已在运行！");
+        return 0;
+    }
+    
+    // 无实例运行，创建本地服务器用于后续实例检测
+    QLocalServer *localServer = new QLocalServer(&app);
+    // 移除可能残留的服务器文件（Linux/macOS需要）
+    QLocalServer::removeServer(serverName);
+    localServer->listen(serverName);
     
     // 解析命令行参数
     QCommandLineParser parser;

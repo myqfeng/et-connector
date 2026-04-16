@@ -8,7 +8,7 @@
 #include <QProgressDialog>
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
-#include "ETRunWorkerWin.h"
+#include "ETRunService.h"
 #include "ConfigManager.h"
 
 //#define IS_NOT_ET_PRO
@@ -36,24 +36,14 @@ private slots:
     static void onOpenWebConsole();
     void onSettings();
     void onAutoStart(bool checked);
-    void onAutoReconnect(bool checked);
     void onAbout();
     void onQuit() const;
     static void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     
-    // EasyTier进程管理相关槽函数
-    void onEasyTierStarted();
-    void onEasyTierStartFailed(const QString &error);
-    void onEasyTierStopped();
-    void onEasyTierCrashed(const QString &error);
-    
-    // 应用退出槽函数
-    void onApplicationQuit();
-    
     // 连接密钥变化槽函数
     void onConnectionKeyChanged();
     
-    // 计划任务相关函数
+    // 计划任务相关函数（管理托盘程序开机自启）
     static void createScheduledTask();
     static void deleteScheduledTask();
 
@@ -64,17 +54,9 @@ private:
     void loadSettings();
     void saveSettings() const;
     
-    // 显示启动进度对话框
-    void showStartProgressDialog();
-    
-    // 显示停止进度对话框
-    void showStopProgressDialog();
-    
-    // 关闭进度对话框
+    // 显示进度对话框
+    void showProgressDialog(const QString &text);
     void closeProgressDialog();
-    
-    // 关闭停止进度对话框
-    void closeStopProgressDialog();
 
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_menu;
@@ -89,16 +71,14 @@ private:
     QAction *m_settingsAction;
     QAction *m_separator3;
     QAction *m_autoStartAction;
-    QAction *m_autoReconnectAction;
     QAction *m_separator4;
     QAction *m_aboutAction;
     QAction *m_quitAction;
     
     // 状态
     ConnectionState m_connectionState;
-    bool m_autoStart;
-    bool m_autoReconnect;
-    bool m_isAutoStartMode;  // 是否从开机自启启动
+    bool m_autoStart;           // 是否开机启动托盘程序
+    bool m_isAutoStartMode;     // 是否从开机自启启动
     QString m_connectionKey;
     
     // 设置
@@ -108,20 +88,14 @@ private:
     SettingsDialog *m_settingsDialog = nullptr;
     AboutDialog *m_aboutDialog = nullptr;
     
-    // EasyTier进程管理器
-    ETRunWorker *m_etWorker;
+    // EasyTier服务管理器
+    ETRunService *m_etService;
     
     // 配置管理器
     ConfigManager *m_configManager;
     
-    // 启动进度对话框
-    QProgressDialog *m_progressDialog;
-    
-    // 停止进度对话框
-    QProgressDialog *m_stopProgressDialog;
-    
-    // 停止后是否需要重新连接
-    bool m_reconnectAfterStop;
+    // 进度对话框
+    QProgressDialog *m_progressDialog = nullptr;
 };
 
 #endif // SYSTEMTRAY_H

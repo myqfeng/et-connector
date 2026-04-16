@@ -10,8 +10,7 @@
 ConfigManager::ConfigManager(QObject *parent)
     : QObject(parent)
     , m_connectionKey("")
-    , m_autoStart(false)
-    , m_autoReconnect(true) // 默认启用自动回连
+    , m_autoStart(false)  // 默认不开启开机自启托盘
 {
     // 获取配置文件路径
     QString configPath = getBaseConfigPath();
@@ -47,11 +46,6 @@ bool ConfigManager::getAutoStart() const
     return m_autoStart;
 }
 
-bool ConfigManager::getAutoReconnect() const
-{
-    return m_autoReconnect;
-}
-
 void ConfigManager::setConnectionKey(const QString &key)
 {
     m_connectionKey = key;
@@ -60,11 +54,6 @@ void ConfigManager::setConnectionKey(const QString &key)
 void ConfigManager::setAutoStart(bool autoStart)
 {
     m_autoStart = autoStart;
-}
-
-void ConfigManager::setAutoReconnect(bool autoReconnect)
-{
-    m_autoReconnect = autoReconnect;
 }
 
 bool ConfigManager::saveConfig()
@@ -76,7 +65,6 @@ bool ConfigManager::saveConfig()
     QJsonObject configObj;
     configObj["connectionKey"] = m_connectionKey;
     configObj["autoStart"] = m_autoStart;
-    configObj["autoReconnect"] = m_autoReconnect;
     
     QJsonDocument doc(configObj);
     QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
@@ -107,7 +95,6 @@ bool ConfigManager::loadConfig()
             QJsonObject configObj = doc.object();
             m_connectionKey = configObj["connectionKey"].toString("");
             m_autoStart = configObj["autoStart"].toBool(false);
-            m_autoReconnect = configObj["autoReconnect"].toBool(true); // 默认启用自动回连
             return true;
         }
     }

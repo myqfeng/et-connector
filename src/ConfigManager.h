@@ -17,12 +17,10 @@ public:
     // 获取配置
     QString getConnectionKey() const;
     bool getAutoStart() const;
-    bool getAutoReconnect() const;
     
     // 设置配置
     void setConnectionKey(const QString &key);
     void setAutoStart(bool autoStart);
-    void setAutoReconnect(bool autoReconnect);
     
     // 保存配置到文件
     bool saveConfig();
@@ -36,8 +34,7 @@ public:
 private:
     // 配置数据
     QString m_connectionKey;
-    bool m_autoStart;
-    bool m_autoReconnect;
+    bool m_autoStart;  // 是否开机启动托盘程序
     
     // 配置文件路径
     QString m_configFilePath;
