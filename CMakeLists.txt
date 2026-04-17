@@ -27,6 +27,7 @@ set(SOURCES
     src/AboutDialog.cpp
     src/ETRunService.cpp
     src/ConfigManager.cpp
+    src/CasdoorLogin.cpp
 )
 
 # 头文件
@@ -36,6 +37,7 @@ set(HEADERS
     src/AboutDialog.h
     src/ETRunService.h
     src/ConfigManager.h
+    src/CasdoorLogin.h
 )
 
 # 资源文件

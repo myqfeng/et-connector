@@ -25,6 +25,17 @@ SystemTray::SystemTray(QObject *parent)
         std::cerr << "SystemTray: 配置加载失败，使用默认配置" << std::endl;
     }
     
+    // 1.5. 初始化 Casdoor 登录器
+    m_casdoorLogin = new CasdoorLogin("d3ff87a9cd6317695066", this);
+    connect(m_casdoorLogin, &CasdoorLogin::loginSuccess, this, [this](const QString &accessToken, const QString &idToken) {
+        // 登录成功，显示对话框显示 token
+        QString message = "Access Token:\n" + accessToken + "\n\nID Token:\n" + idToken;
+        QMessageBox::information(nullptr, "登录成功", message);
+    });
+    connect(m_casdoorLogin, &CasdoorLogin::loginFailed, this, [this](const QString &errorMessage) {
+        QMessageBox::warning(nullptr, "登录失败", errorMessage);
+    });
+    
     // 2. 加载配置
     loadSettings();
     
@@ -117,6 +128,11 @@ void SystemTray::setupMenu()
     m_openWebConsoleAction = new QAction(QIcon(":/assets/webconsole.svg"), "打开Web控制台", this);
     connect(m_openWebConsoleAction, &QAction::triggered, this, &SystemTray::onOpenWebConsole);
     m_menu->addAction(m_openWebConsoleAction);
+    
+    // 登录 EasyTier Pro
+    m_loginEasyTierProAction = new QAction("登录 EasyTier Pro", this);
+    connect(m_loginEasyTierProAction, &QAction::triggered, this, &SystemTray::onLoginEasyTierPro);
+    m_menu->addAction(m_loginEasyTierProAction);
     
     // 设置
 #ifdef IS_NOT_ET_PRO
@@ -277,6 +293,12 @@ void SystemTray::onOpenWebConsole()
 #else
     QMessageBox::information(nullptr, "提示", "暂不支持");
 #endif
+}
+
+void SystemTray::onLoginEasyTierPro()
+{
+    // 启动 OAuth 登录流程
+    m_casdoorLogin->startLogin();
 }
 
 void SystemTray::onSettings()

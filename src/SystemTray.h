@@ -24,6 +24,7 @@
 #include "AboutDialog.h"
 #include "ETRunService.h"
 #include "ConfigManager.h"
+#include "CasdoorLogin.h"
 
 //#define IS_NOT_ET_PRO
 
@@ -56,6 +57,7 @@ public:
 private slots:
     void onToggleConnection();
     void onOpenWebConsole();
+    void onLoginEasyTierPro();
     void onSettings();
     void onAutoStart(bool checked);
     void onAbout();
@@ -84,6 +86,7 @@ private:
     
     // 核心组件
     ConfigManager *m_configManager = nullptr;       ///< 配置管理器
+    CasdoorLogin *m_casdoorLogin = nullptr;         ///< Casdoor OAuth 登录器
     
     // 托盘 UI
     QSystemTrayIcon *m_trayIcon = nullptr;          ///< 系统托盘图标
@@ -97,6 +100,7 @@ private:
     QAction *m_toggleConnectionAction = nullptr;
     QAction *m_separator2 = nullptr;
     QAction *m_openWebConsoleAction = nullptr;
+    QAction *m_loginEasyTierProAction = nullptr;
     QAction *m_settingsAction = nullptr;
     QAction *m_separator3 = nullptr;
     QAction *m_autoStartAction = nullptr;
