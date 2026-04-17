@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "EasyTier Connector"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "EasyTier"
 #define MyAppURL "https://easytier.cn"
 #define MyAppExeName "EasyTierConnector.exe"
