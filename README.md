@@ -1,6 +1,6 @@
 # EasyTier 控制台连接器
 
-基于 Qt6 的 Windows 系统托盘应用程序，用于 EasyTier 远程控制台连接管理。
+基于 Qt6 的 Windows 系统托盘应用程序，用于管理 EasyTier 远程控制台连接。应用程序常驻系统托盘，通过 `easytier-cli.exe` 将 EasyTier Core 注册为 Windows 系统服务进行管理，提供连接管理、开机自启等功能。
 
 ## 功能特性
 
@@ -11,7 +11,7 @@
 | 连接控制 | 一键启动/停止 EasyTier Core |
 | Web 控制台 | 快速打开 https://console.easytier.net/ |
 | 设置 | 配置连接地址密钥 |
-| 开机自启 | Windows 计划任务实现 |
+| 开机自启 | Windows 注册表实现（无需管理员权限） |
 | 自动回连 | 程序启动时自动连接 |
 | 关于软件 | 显示版本信息 |
 
@@ -28,21 +28,27 @@
 ```
 et-web-connector/
 ├── src/                      # 源代码
-│   ├── main.cpp              # 程序入口
+│   ├── main.cpp              # 程序入口，命令行解析，单实例检测
 │   ├── SystemTray.h/cpp      # 系统托盘主类
-│   ├── ETRunWorkerWin.h/cpp  # EasyTier Core 进程管理器
-│   ├── ConfigManager.h/cpp   # 配置管理（JSON）
-│   ├── SettingsDialog.h/cpp  # 设置对话框
-│   └── AboutDialog.h/cpp     # 关于对话框
+│   ├── ETRunService.h/cpp    # EasyTier 系统服务管理器（静态类）
+│   ├── ConfigManager.h/cpp   # JSON 配置文件管理
+│   ├── SettingsDialog.h/cpp  # 连接密钥设置对话框
+│   └── AboutDialog.h/cpp     # 关于软件对话框
 ├── assets/                   # 图标资源 (SVG/ICO)
 ├── etcore/                   # EasyTier Core 依赖
 │   ├── easytier-core.exe     # 核心程序
+│   ├── easytier-cli.exe      # 命令行管理工具
 │   ├── wintun.dll            # Wintun 驱动
 │   ├── Packet.dll            # 网络包处理
 │   └── WinDivert64.sys       # WinDivert 驱动
-├── resources.qrc             # Qt 资源文件
-├── app.manifest              # Windows 应用清单
-└── CMakeLists.txt            # CMake 配置
+├── docs/                     # 使用文档
+│   ├── 快速开始.md
+│   ├── 配置说明.md
+│   ├── 常见问题.md
+│   └── 开发指南.md
+├── resources.qrc             # Qt 资源文件定义
+├── app.manifest              # Windows 应用清单 (UAC/DPI/兼容性)
+└── CMakeLists.txt            # CMake 构建配置
 ```
 
 ## 构建说明
@@ -64,21 +70,21 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/Qt6.11
 # 3. 编译
 cmake --build . --config Release
 
-# 4. 运行
-./EasyTierConnector.exe
+# 4. 安装（输出到 Install/bin/ 目录，自动部署 Qt 运行时）
+cmake --install .
 ```
 
 ### 命令行参数
 
 | 参数 | 说明 |
 |------|------|
-| `--auto-start` | 开机自启模式启动（不显示启动消息） |
+| `--auto-start` | 开机自启模式启动（不显示启动通知） |
 | `--help` | 显示帮助信息 |
 | `--version` | 显示版本号 |
 
 ## 配置说明
 
-配置文件位于 `%APPDATA%/EasyTier/config.json`：
+配置文件位于 `%LOCALAPPDATA%/EasyTier/config.json`：
 
 ```json
 {
@@ -121,6 +127,7 @@ NotStarted ──start()──> Starting ──success──> Running
 | 文件 | 说明 |
 |------|------|
 | `easytier-core.exe` | EasyTier 核心程序 |
+| `easytier-cli.exe` | EasyTier 命令行管理工具 |
 | `wintun.dll` | Windows TUN 驱动 |
 | `Packet.dll` | WinPcap 数据包捕获库 |
 | `WinDivert64.sys` | Windows 网络数据包拦截驱动 |
