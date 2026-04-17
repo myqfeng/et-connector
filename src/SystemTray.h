@@ -19,6 +19,7 @@
 #include <QProgressDialog>
 #include <QPointer>
 #include <QTimer>
+#include <QSettings>
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
 #include "ETRunService.h"
@@ -74,9 +75,10 @@ private:
     void showProgressDialog(const QString &text);
     void closeProgressDialog();
     
-    // 计划任务管理（Windows 开机自启）
-    bool createScheduledTask();
-    bool deleteScheduledTask();
+    // 注册表自启管理（Windows 开机自启，无需管理员权限）
+    static bool registerAutoStart();
+    static bool unregisterAutoStart();
+    static bool isAutoStartRegistered();
 
     // === 成员变量（按初始化顺序排列）===
     

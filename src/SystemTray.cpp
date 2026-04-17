@@ -209,6 +209,14 @@ void SystemTray::loadSettings()
 {
     m_autoStart = m_configManager->getAutoStart();
     m_connectionKey = m_configManager->getConnectionKey();
+    
+    // 同步注册表实际状态到 UI
+    bool registered = isAutoStartRegistered();
+    if (m_autoStart != registered) {
+        m_autoStart = registered;
+        m_configManager->setAutoStart(m_autoStart);
+        m_configManager->saveConfig();
+    }
 }
 
 void SystemTray::saveSettings()
@@ -302,9 +310,9 @@ void SystemTray::onAutoStart(bool checked)
     
     bool success;
     if (checked) {
-        success = createScheduledTask();
+        success = registerAutoStart();
     } else {
-        success = deleteScheduledTask();
+        success = unregisterAutoStart();
     }
     
     if (!success) {
@@ -318,54 +326,38 @@ void SystemTray::onAutoStart(bool checked)
     }
 }
 
-bool SystemTray::createScheduledTask()
+bool SystemTray::registerAutoStart()
 {
-    const QString appPath = QString("\"%1\"").arg(QApplication::applicationFilePath());
-    const QString appName = "EasyTierConnector";
+    const QString appPath = QApplication::applicationFilePath();
+    const QString value = QString("\"%1\" --auto-start").arg(appPath);
     
-    QStringList args;
-    args << "/create"
-         << "/tn" << appName
-         << "/tr" << QString("%1 --auto-start").arg(appPath)
-         << "/sc" << "onlogon"
-         << "/rl" << "highest"
-         << "/f";
+    QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
+                       QSettings::NativeFormat);
+    settings.setValue("EasyTierConnector", value);
+    settings.sync();
     
-    QProcess process;
-    process.start("schtasks.exe", args);
-    
-    if (!process.waitForFinished(10000)) {
-        std::cerr << "创建计划任务超时" << std::endl;
-        process.kill();
-        return false;
-    }
-    
-    bool success = (process.exitCode() == 0);
-    std::clog << "创建开机自启任务: " << (success ? "成功" : "失败") << " "
-              << QString::fromUtf8(process.readAllStandardOutput()).toStdString() << std::endl;
+    bool success = (settings.status() == QSettings::NoError);
+    std::clog << "注册开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
 }
 
-bool SystemTray::deleteScheduledTask()
+bool SystemTray::unregisterAutoStart()
 {
-    QStringList args;
-    args << "/delete"
-         << "/tn" << "EasyTierConnector"
-         << "/f";
+    QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
+                       QSettings::NativeFormat);
+    settings.remove("EasyTierConnector");
+    settings.sync();
     
-    QProcess process;
-    process.start("schtasks.exe", args);
-    
-    if (!process.waitForFinished(10000)) {
-        std::cerr << "删除计划任务超时" << std::endl;
-        process.kill();
-        return false;
-    }
-    
-    bool success = (process.exitCode() == 0);
-    std::clog << "删除开机自启任务: " << (success ? "成功" : "失败") << " "
-              << QString::fromUtf8(process.readAllStandardOutput()).toStdString() << std::endl;
+    bool success = (settings.status() == QSettings::NoError);
+    std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+}
+
+bool SystemTray::isAutoStartRegistered()
+{
+    QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
+                       QSettings::NativeFormat);
+    return settings.contains("EasyTierConnector");
 }
 
 void SystemTray::onAbout()

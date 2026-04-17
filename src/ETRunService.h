@@ -51,13 +51,16 @@ public:
      * @param connectionKey 连接密钥
      * @return 是否启动成功
      * 
-     * 如果服务未安装，会自动安装后启动。
+     * 如果服务未安装，会合并安装+启动为一条命令执行，只需一次 UAC 授权。
+     * 如果服务已安装，直接启动（一次 UAC 授权）。
      */
     static bool start(const QString &connectionKey);
     
     /**
      * @brief 停止并卸载服务
-     * @return 是否停止成功
+     * @return 是否操作成功
+     * 
+     * 合并停止+卸载为一条命令执行，只需一次 UAC 授权。
      */
     static bool stop();
     

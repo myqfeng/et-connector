@@ -22,9 +22,9 @@ AboutDialog::AboutDialog(QWidget *parent)
 void AboutDialog::setupUI()
 {
     setWindowTitle("关于 EasyTier 控制台连接器");
-    setWindowIcon(QIcon(":/assets/favicon.svg"));
+    setWindowIcon(QIcon(":/assets/favicon.ico"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setFixedSize(400, 250);
+    setFixedSize(400, 280);
     
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(15);
@@ -51,6 +51,7 @@ void AboutDialog::setupUI()
     auto *versionLabel = new QLabel(QString("版本: %1").arg(qApp->applicationVersion()), this);
     versionLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(versionLabel);
+    mainLayout->addStretch();
     
     // 描述
     auto *descriptionLabel = new QLabel(
@@ -59,10 +60,11 @@ void AboutDialog::setupUI()
     );
     descriptionLabel->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(descriptionLabel);
+    mainLayout->addStretch();
 
     // 版权
     auto *copyrightLabel = new QLabel(
-        QString("Copyright © %1 明月清风. All rights reserved.").arg(QDate::currentDate().year()), 
+        QString("Copyright © %1 明月清风. All rights reserved.").arg(QDate::currentDate().year()),
         this
     );
     QFont copyrightFont = copyrightLabel->font();

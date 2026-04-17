@@ -165,43 +165,43 @@ bool ETRunService::start(const QString &connectionKey)
         return true;
     }
     
-    // 如果服务未安装，先安装（需要管理员权限）
+    // 如果服务未安装，合并安装+启动为一条 cmd /c 命令，只需一次 UAC 授权
     if (!isServiceInstalled()) {
         const QString hostname = QSysInfo::machineHostName();
         
-        // 安装服务命令
-        // CORE_ARGS 直接放在最后，不需要 -- 分隔符
-        QStringList installArgs;
-        installArgs << "service" << "install"
-                    << "--display-name" << QString(SERVICE_NAME)
-                    << "--"
-                    << "-w" << connectionKey
-                    << "--hostname" << hostname
-                    << "--secure-mode" << "true"
-                    << "--rpc-portal" << "15888";
+        // 构造安装命令
+        QString installCmd = QString("\"%1\" service install --display-name \"%2\" -- -w \"%3\" --hostname \"%4\" --secure-mode true --rpc-portal 15888")
+                                 .arg(cliPath, SERVICE_NAME, connectionKey, hostname);
+        // 构造启动命令
+        QString startCmd = QString("\"%1\" service start").arg(cliPath);
         
-        std::clog << "ETRunService: 安装服务 (需要UAC授权), 参数: " << installArgs.join(" ").toStdString() << std::endl;
+        // 使用 cmd /c 串联：install 成功后才执行 start (&&)
+        QStringList args;
+        args << "/c" << QString("\"%1 && %2\"").arg(installCmd, startCmd);
         
-        if (!executeElevated(cliPath, installArgs, workDir)) {
-            std::cerr << "ETRunService: 服务安装失败" << std::endl;
+        std::clog << "ETRunService: 安装并启动服务 (需要UAC授权)" << std::endl;
+        
+        if (!executeElevated("cmd.exe", args, workDir)) {
+            std::cerr << "ETRunService: 安装并启动服务失败" << std::endl;
             return false;
         }
         
-        std::clog << "ETRunService: 服务安装成功" << std::endl;
+        std::clog << "ETRunService: 安装并启动服务成功" << std::endl;
+    } else {
+        // 服务已安装：直接启动（只需一次 UAC 授权）
+        QStringList startArgs;
+        startArgs << "service" << "start";
+        
+        std::clog << "ETRunService: 启动服务 (需要UAC授权), 参数: " << startArgs.join(" ").toStdString() << std::endl;
+        
+        if (!executeElevated(cliPath, startArgs, workDir)) {
+            std::cerr << "ETRunService: 服务启动失败" << std::endl;
+            return false;
+        }
+        
+        std::clog << "ETRunService: 服务启动成功" << std::endl;
     }
     
-    // 启动服务（使用 UAC 提权）
-    QStringList startArgs;
-    startArgs << "service" << "start";
-    
-    std::clog << "ETRunService: 启动服务 (需要UAC授权), 参数: " << startArgs.join(" ").toStdString() << std::endl;
-    
-    if (!executeElevated(cliPath, startArgs, workDir)) {
-        std::cerr << "ETRunService: 服务启动失败" << std::endl;
-        return false;
-    }
-    
-    std::clog << "ETRunService: 服务启动成功" << std::endl;
     return true;
 }
 
@@ -215,33 +215,23 @@ bool ETRunService::stop()
     
     QString workDir = getWorkingDirectory();
     
-    // 停止服务（使用 UAC 提权）
-    QStringList stopArgs;
-    stopArgs << "service" << "stop";
+    // 合并停止+卸载为一条 cmd /c 命令，只需一次 UAC 授权
+    // 使用 & 串联：无论停止是否成功，都尝试卸载（与原逻辑一致）
+    QString stopCmd = QString("\"%1\" service stop").arg(cliPath);
+    QString uninstallCmd = QString("\"%1\" service uninstall").arg(cliPath);
     
-    std::clog << "ETRunService: 停止服务 (需要UAC授权), 参数: " << stopArgs.join(" ").toStdString() << std::endl;
+    QStringList args;
+    args << "/c" << QString("\"%1 & %2\"").arg(stopCmd, uninstallCmd);
     
-    bool stopSuccess = executeElevated(cliPath, stopArgs, workDir);
-    if (!stopSuccess) {
-        std::cerr << "ETRunService: 停止服务失败" << std::endl;
-        // 继续尝试卸载
-    } else {
-        std::clog << "ETRunService: 停止服务成功" << std::endl;
-    }
+    std::clog << "ETRunService: 停止并卸载服务 (需要UAC授权)" << std::endl;
     
-    // 卸载服务（使用 UAC 提权）
-    QStringList uninstallArgs;
-    uninstallArgs << "service" << "uninstall";
-    
-    std::clog << "ETRunService: 卸载服务 (需要UAC授权), 参数: " << uninstallArgs.join(" ").toStdString() << std::endl;
-    
-    if (!executeElevated(cliPath, uninstallArgs, workDir)) {
-        std::cerr << "ETRunService: 卸载服务失败" << std::endl;
+    if (!executeElevated("cmd.exe", args, workDir)) {
+        std::cerr << "ETRunService: 停止并卸载服务失败" << std::endl;
         return false;
     }
     
-    std::clog << "ETRunService: 卸载服务成功" << std::endl;
-    return stopSuccess;
+    std::clog << "ETRunService: 停止并卸载服务成功" << std::endl;
+    return true;
 }
 
 bool ETRunService::isRunning()
