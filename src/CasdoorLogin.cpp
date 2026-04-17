@@ -83,10 +83,21 @@ void CasdoorLogin::startLogin()
                 QString response = "HTTP/1.1 200 OK\r\n"
                                    "Content-Type: text/html; charset=utf-8\r\n"
                                    "Connection: close\r\n\r\n"
-                                   "<html><body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>"
-                                   "<h2 style='color: #66ccff;'>登录成功!</h2>"
-                                   "<p>您可以关闭此标签页并返回应用程序。</p>"
-                                   "</body></html>";
+                                   "<!DOCTYPE html>"
+                                   "<html>"
+                                   "<head>"
+                                   "<meta charset='utf-8'>"
+                                   "<title>登录成功</title>"
+                                   "<link rel='icon' href='https://console.easytier.net/favicon.svg'>"
+                                   "</head>"
+                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5;'>"
+                                   "<div style='background-color: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; min-width: 400px;'>"
+                                   "<img src='https://console.easytier.net/favicon.svg' width='80' height='80' style='margin-bottom: 20px;'>"
+                                   "<h2 style='color: #66ccff; margin: 0 0 20px 0;'>登录成功!</h2>"
+                                   "<p style='color: #666; font-size: 16px; margin: 0;'>您可以关闭此标签页并返回应用程序。</p>"
+                                   "</div>"
+                                   "</body>"
+                                   "</html>";
                 socket->write(response.toUtf8());
                 socket->flush();
                 socket->disconnectFromHost();
@@ -111,10 +122,21 @@ void CasdoorLogin::startLogin()
                 QString response = "HTTP/1.1 400 Bad Request\r\n"
                                    "Content-Type: text/html; charset=utf-8\r\n"
                                    "Connection: close\r\n\r\n"
-                                   "<html><body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>"
-                                   "<h2 style='color: #f44336;'>登录失败</h2>"
-                                   "<p>" + errorMsg + "</p>"
-                                   "</body></html>";
+                                   "<!DOCTYPE html>"
+                                   "<html>"
+                                   "<head>"
+                                   "<meta charset='utf-8'>"
+                                   "<title>登录失败</title>"
+                                   "<link rel='icon' href='https://console.easytier.net/favicon.svg'>"
+                                   "</head>"
+                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5;'>"
+                                   "<div style='background-color: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; min-width: 400px;'>"
+                                   "<img src='https://console.easytier.net/favicon.svg' width='80' height='80' style='margin-bottom: 20px;'>"
+                                   "<h2 style='color: #f44336; margin: 0 0 20px 0;'>登录失败</h2>"
+                                   "<p style='color: #666; font-size: 16px; margin: 0;'>" + errorMsg + "</p>"
+                                   "</div>"
+                                   "</body>"
+                                   "</html>";
                 socket->write(response.toUtf8());
                 socket->flush();
                 socket->disconnectFromHost();

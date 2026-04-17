@@ -130,7 +130,7 @@ void SystemTray::setupMenu()
     m_menu->addAction(m_openWebConsoleAction);
     
     // 登录 EasyTier Pro
-    m_loginEasyTierProAction = new QAction("登录 EasyTier Pro", this);
+    m_loginEasyTierProAction = new QAction(QIcon(":/assets/login.svg"), "登录 EasyTier Pro", this);
     connect(m_loginEasyTierProAction, &QAction::triggered, this, &SystemTray::onLoginEasyTierPro);
     m_menu->addAction(m_loginEasyTierProAction);
     
