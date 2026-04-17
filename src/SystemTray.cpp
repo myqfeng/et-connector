@@ -329,7 +329,13 @@ void SystemTray::onAutoStart(bool checked)
 bool SystemTray::registerAutoStart()
 {
     const QString appPath = QApplication::applicationFilePath();
-    const QString value = QString("\"%1\" --auto-start").arg(appPath);
+    QString value = QString("\"%1\" --auto-start").arg(appPath);
+
+    // 在Windows下要改成反斜杠路径
+#ifdef Q_OS_WIN32
+    value.replace('/', '\\');
+#endif
+
     
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
