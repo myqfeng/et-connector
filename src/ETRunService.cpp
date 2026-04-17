@@ -1,115 +1,92 @@
+/**
+ * @file ETRunService.cpp
+ * @brief EasyTier Core 系统服务管理器实现
+ */
+
 #include "ETRunService.h"
 #include <QCoreApplication>
 #include <QDir>
-#include <QDebug>
 #include <QSysInfo>
 #include <QSettings>
+#include <QProcess>
+#include <QFile>
+#include <iostream>
 
-ETRunService::ETRunService(QObject *parent)
-    : QObject(parent)
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#include <shellapi.h>
+#include <tlhelp32.h>
+#endif
+
+/**
+ * @brief 以管理员权限执行命令（通过 UAC 提权）
+ *
+ * 使用 ShellExecuteExW 配合 "runas" 动词触发 UAC 提示框。
+ * 用户确认后以管理员权限运行程序。
+ *
+ * @param program 程序路径
+ * @param arguments 参数列表
+ * @param workingDir 工作目录
+ * @return 是否成功启动提权进程
+ */
+static bool executeElevated(const QString &program,
+                            const QStringList &arguments,
+                            const QString &workingDir)
 {
-}
-
-ETRunService::~ETRunService()
-= default;
-
-bool ETRunService::start(const QString &connectionKey)
-{
-    if (connectionKey.isEmpty()) {
-        qDebug() << "ETRunService::start: 连接密钥为空";
+    // 转换为 Windows 原生路径格式
+    QString nativeProgram = QDir::toNativeSeparators(program);
+    QString nativeWorkingDir = QDir::toNativeSeparators(workingDir);
+    QString args = arguments.join(' ');
+    
+    std::clog << "ETRunService: 执行 UAC 提权命令: " << nativeProgram.toStdString() << " " << args.toStdString() << std::endl;
+    
+    // 初始化 SHELLEXECUTEINFOW 结构体
+    SHELLEXECUTEINFOW sei = {0};
+    sei.cbSize = sizeof(SHELLEXECUTEINFOW);
+    sei.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI;
+    sei.hwnd = nullptr;
+    sei.lpVerb = L"runas";  // UAC 提权动词
+    sei.lpFile = reinterpret_cast<LPCWSTR>(nativeProgram.utf16());
+    sei.lpParameters = args.isEmpty() ? nullptr : reinterpret_cast<LPCWSTR>(args.utf16());
+    sei.lpDirectory = nativeWorkingDir.isEmpty() ? nullptr : reinterpret_cast<LPCWSTR>(nativeWorkingDir.utf16());
+    sei.nShow = SW_HIDE;  // 隐藏窗口
+    
+    // 执行 ShellExecuteExW
+    if (!ShellExecuteExW(&sei)) {
+        DWORD error = GetLastError();
+        std::cerr << "ETRunService: ShellExecuteExW 失败, 错误码: " << error << std::endl;
         return false;
     }
     
-    QString cliPath = getCliPath();
-    if (!QFile::exists(cliPath)) {
-        qDebug() << "ETRunService::start: 找不到 easytier-cli.exe:" << cliPath;
-        return false;
-    }
-    
-    QString output;
-    int exitCode;
-    
-    // 如果服务未安装，先安装
-    if (!isServiceInstalled()) {
-        const QString &hostname = QSysInfo::machineHostName();
+    // 等待进程完成
+    if (sei.hProcess) {
+        DWORD waitResult = WaitForSingleObject(sei.hProcess, 120000);  // 2分钟超时
         
-        // 安装服务
-        QStringList installArgs;
-        installArgs << "service" << "install"
-                    << "--display-name" << "QtET Web Connector"
-                    << "--"
-                    << "--config-server" << connectionKey
-                    << "--hostname" << hostname
-                    << "--secure-mode" << "true";
-        
-        qDebug() << "安装 EasyTier 服务:" << installArgs;
-        exitCode = executeCommand(cliPath, installArgs, output);
-        if (exitCode != 0) {
-            qDebug() << "服务安装失败:" << output;
+        if (waitResult == WAIT_TIMEOUT) {
+            TerminateProcess(sei.hProcess, 1);
+            CloseHandle(sei.hProcess);
+            std::cerr << "ETRunService: UAC 提权命令执行超时" << std::endl;
             return false;
         }
-        qDebug() << "服务安装成功";
+        
+        // 获取退出码
+        DWORD exitCode = 0;
+        if (GetExitCodeProcess(sei.hProcess, &exitCode)) {
+            std::clog << "ETRunService: UAC 提权命令退出码: " << exitCode << std::endl;
+        }
+        
+        CloseHandle(sei.hProcess);
+        
+        // 用户取消 UAC 时，exitCode 通常为 1223 (ERROR_CANCELLED)
+        if (exitCode == 1223) {
+            std::cerr << "ETRunService: 用户取消了 UAC 授权" << std::endl;
+            return false;
+        }
+        
+        return exitCode == 0;
     }
-    
-    // 启动服务
-    QStringList startArgs;
-    startArgs << "service" << "start";
-    
-    qDebug() << "启动 EasyTier 服务:" << startArgs;
-    exitCode = executeCommand(cliPath, startArgs, output);
-    
-    if (exitCode == 0 || output.contains("already running") || output.contains("已运行")) {
-        qDebug() << "服务启动成功";
-        return true;
-    }
-    
-    qDebug() << "服务启动失败:" << output;
-    return false;
-}
-
-bool ETRunService::stop()
-{
-    const QString &cliPath = getCliPath();
-    if (!QFile::exists(cliPath)) {
-        qDebug() << "ETRunService::stop: 找不到 easytier-cli.exe:" << cliPath;
-        return false;
-    }
-    
-    QString output;
-
-    // 停止服务
-    QStringList stopArgs;
-    stopArgs << "service" << "stop";
-    
-    qDebug() << "停止 EasyTier 服务:" << stopArgs;
-    int exitCode = executeCommand(cliPath, stopArgs, output);
-    qDebug() << "停止服务结果:" << exitCode << output;
-    
-    // 卸载服务
-    QStringList uninstallArgs;
-    uninstallArgs << "service" << "uninstall";
-    
-    qDebug() << "卸载 EasyTier 服务:" << uninstallArgs;
-    exitCode = executeCommand(cliPath, uninstallArgs, output);
-    qDebug() << "卸载服务结果:" << exitCode << output;
     
     return true;
-}
-
-bool ETRunService::isRunning()
-{
-    const QString &cliPath = getCliPath();
-    if (!QFile::exists(cliPath)) {
-        return false;
-    }
-    
-    QString output;
-    QStringList args;
-    args << "service" << "status";
-    
-    executeCommand(cliPath, args, output);
-    
-    return output.contains("running") || output.contains("运行中") || output.contains("Running");
 }
 
 QString ETRunService::getCliPath()
@@ -124,25 +101,178 @@ QString ETRunService::getWorkingDirectory()
     return QDir::toNativeSeparators(appDir + "/etcore");
 }
 
-int ETRunService::executeCommand(const QString &command, const QStringList &args, QString &output)
+CommandResult ETRunService::executeCommand(const QString &command, 
+                                           const QStringList &args,
+                                           const int timeoutMs)
 {
+    CommandResult result;
+    
     QProcess process;
     process.setWorkingDirectory(getWorkingDirectory());
     process.start(command, args);
     
-    if (!process.waitForFinished(30000)) {  // 30秒超时
-        process.kill();
-        process.waitForFinished(3000);
-        output = "操作超时";
-        return -1;
+    if (!process.waitForStarted(5000)) {
+        result.errorString = QString("无法启动进程: %1").arg(process.errorString());
+        std::cerr << "ETRunService: " << result.errorString.toStdString() << std::endl;
+        return result;
     }
     
-    output = QString::fromUtf8(process.readAllStandardOutput() + process.readAllStandardError());
-    return process.exitCode();
+    if (!process.waitForFinished(timeoutMs)) {
+        process.kill();
+        process.waitForFinished(3000);
+        result.errorString = "命令执行超时";
+        std::cerr << "ETRunService: " << result.errorString.toStdString() << std::endl;
+        return result;
+    }
+    
+    result.exitCode = process.exitCode();
+    result.output = QString::fromUtf8(
+        process.readAllStandardOutput() + process.readAllStandardError()
+    );
+    result.success = (result.exitCode == 0);
+    
+    return result;
 }
 
 bool ETRunService::isServiceInstalled()
 {
-    QSettings settings(R"(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services)", QSettings::NativeFormat);
-    return settings.childGroups().contains("QtET Web Connector");
+    QSettings settings(
+        R"(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services)", 
+        QSettings::NativeFormat
+    );
+    
+    return settings.childGroups().contains(SERVICE_NAME);
+}
+
+bool ETRunService::start(const QString &connectionKey)
+{
+    if (connectionKey.isEmpty()) {
+        std::cerr << "ETRunService::start: 连接密钥为空" << std::endl;
+        return false;
+    }
+    
+    QString cliPath = getCliPath();
+    if (!QFile::exists(cliPath)) {
+        std::cerr << "ETRunService::start: 找不到 easytier-cli.exe: " << cliPath.toStdString() << std::endl;
+        return false;
+    }
+    
+    QString workDir = getWorkingDirectory();
+    
+    // 检查服务是否已在运行
+    if (isRunning()) {
+        std::clog << "ETRunService: 服务已在运行中" << std::endl;
+        return true;
+    }
+    
+    // 如果服务未安装，先安装（需要管理员权限）
+    if (!isServiceInstalled()) {
+        const QString hostname = QSysInfo::machineHostName();
+        
+        // 安装服务命令
+        // CORE_ARGS 直接放在最后，不需要 -- 分隔符
+        QStringList installArgs;
+        installArgs << "service" << "install"
+                    << "--display-name" << QString(SERVICE_NAME)
+                    << "--"
+                    << "-w" << connectionKey
+                    << "--hostname" << hostname
+                    << "--secure-mode" << "true"
+                    << "--rpc-portal" << "15888";
+        
+        std::clog << "ETRunService: 安装服务 (需要UAC授权), 参数: " << installArgs.join(" ").toStdString() << std::endl;
+        
+        if (!executeElevated(cliPath, installArgs, workDir)) {
+            std::cerr << "ETRunService: 服务安装失败" << std::endl;
+            return false;
+        }
+        
+        std::clog << "ETRunService: 服务安装成功" << std::endl;
+    }
+    
+    // 启动服务（使用 UAC 提权）
+    QStringList startArgs;
+    startArgs << "service" << "start";
+    
+    std::clog << "ETRunService: 启动服务 (需要UAC授权), 参数: " << startArgs.join(" ").toStdString() << std::endl;
+    
+    if (!executeElevated(cliPath, startArgs, workDir)) {
+        std::cerr << "ETRunService: 服务启动失败" << std::endl;
+        return false;
+    }
+    
+    std::clog << "ETRunService: 服务启动成功" << std::endl;
+    return true;
+}
+
+bool ETRunService::stop()
+{
+    QString cliPath = getCliPath();
+    if (!QFile::exists(cliPath)) {
+        std::cerr << "ETRunService::stop: 找不到 easytier-cli.exe: " << cliPath.toStdString() << std::endl;
+        return false;
+    }
+    
+    QString workDir = getWorkingDirectory();
+    
+    // 停止服务（使用 UAC 提权）
+    QStringList stopArgs;
+    stopArgs << "service" << "stop";
+    
+    std::clog << "ETRunService: 停止服务 (需要UAC授权), 参数: " << stopArgs.join(" ").toStdString() << std::endl;
+    
+    bool stopSuccess = executeElevated(cliPath, stopArgs, workDir);
+    if (!stopSuccess) {
+        std::cerr << "ETRunService: 停止服务失败" << std::endl;
+        // 继续尝试卸载
+    } else {
+        std::clog << "ETRunService: 停止服务成功" << std::endl;
+    }
+    
+    // 卸载服务（使用 UAC 提权）
+    QStringList uninstallArgs;
+    uninstallArgs << "service" << "uninstall";
+    
+    std::clog << "ETRunService: 卸载服务 (需要UAC授权), 参数: " << uninstallArgs.join(" ").toStdString() << std::endl;
+    
+    if (!executeElevated(cliPath, uninstallArgs, workDir)) {
+        std::cerr << "ETRunService: 卸载服务失败" << std::endl;
+        return false;
+    }
+    
+    std::clog << "ETRunService: 卸载服务成功" << std::endl;
+    return stopSuccess;
+}
+
+bool ETRunService::isRunning()
+{
+    // 创建系统进程快照，TH32CS_SNAPPROCESS 表示包含所有进程信息
+    // 参数 dwProcessID=0 表示当前进程，对 TH32CS_SNAPPROCESS 无实际影响
+    const HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE) {
+        std::cerr << "ETRunService::isRunning: CreateToolhelp32Snapshot 失败" << std::endl;
+        return false;
+    }
+
+    // PROCESSENTRY32W 是进程信息的宽字符版本结构体
+    // 必须在调用 Process32FirstW 之前设置 dwSize 为结构体大小，否则调用失败
+    PROCESSENTRY32W entry;
+    entry.dwSize = sizeof(PROCESSENTRY32W);
+
+    bool found = false;
+    // Process32FirstW 获取快照中的第一个进程信息
+    if (Process32FirstW(snapshot, &entry)) {
+        do {
+            // _wcsicmp 宽字符不区分大小写比较，匹配进程名
+            if (_wcsicmp(entry.szExeFile, L"easytier-core.exe") == 0) {
+                found = true;
+                break;
+            }
+            // Process32NextW 遍历快照中的下一个进程
+        } while (Process32NextW(snapshot, &entry));
+    }
+
+    // 关闭快照句柄，释放系统资源
+    CloseHandle(snapshot);
+    return found;
 }

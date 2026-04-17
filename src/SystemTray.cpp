@@ -1,3 +1,8 @@
+/**
+ * @file SystemTray.cpp
+ * @brief 系统托盘主类实现
+ */
+
 #include "SystemTray.h"
 #include <QApplication>
 #include <QDesktopServices>
@@ -5,102 +10,82 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <QTimer>
+#include <QThread>
+#include <QProcess>
+#include <iostream>
 
 SystemTray::SystemTray(QObject *parent)
     : QObject(parent)
-    , m_connectionState(ConnectionState::NotStarted)
-    , m_autoStart(false)
-    , m_isAutoStartMode(false)
 {
-    qDebug() << "SystemTray::SystemTray() 开始构造";
+    std::clog << "SystemTray: 初始化开始" << std::endl;
     
-    try {
-        // 初始化配置管理器
-        m_configManager = new ConfigManager(this);
-        m_configManager->loadConfig();
+    // 1. 初始化配置管理器
+    m_configManager = new ConfigManager(this);
+    if (!m_configManager->loadConfig()) {
+        std::cerr << "SystemTray: 配置加载失败，使用默认配置" << std::endl;
+    }
     
-        // 兼容旧的设置
-        m_settings = new QSettings("EasyTier", "Connector", this);
-        loadSettings();
-        
-        // 如果旧设置存在，迁移到ConfigManager
-        if (!m_settings->value("connectionKey", "").toString().isEmpty()) {
-            m_connectionKey = m_settings->value("connectionKey", "").toString();
-            m_autoStart = m_settings->value("autoStart", false).toBool();
-            m_configManager->setConnectionKey(m_connectionKey);
-            m_configManager->setAutoStart(m_autoStart);
-            m_configManager->saveConfig();
-        }
-        
-        // 重新加载配置
-        m_configManager->loadConfig();
-        loadSettings();
-        
-        // 创建系统托盘图标
-        m_trayIcon = new QSystemTrayIcon(this);
-        QIcon icon(":/assets/favicon.svg");
-        m_trayIcon->setIcon(icon);
-        m_trayIcon->setToolTip("EasyTier 控制台连接器");
-        
-        // 创建菜单
-        m_menu = new QMenu();
-        setupMenu();
-        m_trayIcon->setContextMenu(m_menu);
-        
-        // 连接信号
-        connect(m_trayIcon, &QSystemTrayIcon::activated, 
-                this, &SystemTray::onTrayActivated);
+    // 2. 加载配置
+    loadSettings();
+    
+    // 3. 创建系统托盘图标
+    m_trayIcon = new QSystemTrayIcon(this);
+    QIcon icon(":/assets/favicon.svg");
+    if (icon.isNull()) {
+        std::cerr << "SystemTray: 无法加载托盘图标" << std::endl;
+    }
+    m_trayIcon->setIcon(icon);
+    m_trayIcon->setToolTip("EasyTier 控制台连接器");
+    
+    // 4. 创建菜单
+    m_menu = new QMenu();
+    setupMenu();
+    m_trayIcon->setContextMenu(m_menu);
+    
+    // 5. 连接托盘激活信号
+    connect(m_trayIcon, &QSystemTrayIcon::activated,
+            this, &SystemTray::onTrayActivated);
 
-        // 初始化EasyTier服务管理器
-        m_etService = new ETRunService(this);
-        
-        // 检查服务是否已经在运行
-        if (m_etService->isRunning()) {
-            updateStatus(ConnectionState::Connected);
-            qDebug() << "EasyTier 服务已在运行中";
-        }
-        
-        qDebug() << "SystemTray::SystemTray() 构造完成";
+    // 6. 检查服务是否已在运行
+    if (ETRunService::isRunning()) {
+        updateStatus(ConnectionState::Connected);
+        std::clog << "SystemTray: EasyTier 服务已在运行中" << std::endl;
     }
-    catch (const std::exception& e) {
-        qDebug() << "SystemTray 构造函数中发生异常:" << e.what();
-    }
+    
+    // 7. 启动心跳定时器，每2秒检测 easytier-core 进程状态
+    m_heartbeatTimer = new QTimer(this);
+    connect(m_heartbeatTimer, &QTimer::timeout, this, &SystemTray::onHeartbeat);
+    m_heartbeatTimer->start(2000);
+    
+    std::clog << "SystemTray: 初始化完成" << std::endl;
 }
 
 SystemTray::~SystemTray()
 {
-    qDebug() << "SystemTray::~SystemTray() 开始析构";
+    std::clog << "SystemTray: 析构开始" << std::endl;
     
-    try {
+    // 保存配置
+    if (m_configManager) {
         m_configManager->saveConfig();
-        saveSettings();
-
-        if (m_settingsDialog != nullptr) {
-            delete m_settingsDialog;
-            m_settingsDialog = nullptr;
-        }
-        if (m_aboutDialog != nullptr) {
-            delete m_aboutDialog;
-            m_aboutDialog = nullptr;
-        }
-        if (m_progressDialog != nullptr) {
-            delete m_progressDialog;
-            m_progressDialog = nullptr;
-        }
-    }
-    catch (const std::exception& e) {
-        qDebug() << "SystemTray 析构函数中发生异常:" << e.what();
     }
     
-    qDebug() << "SystemTray::~SystemTray() 析构完成";
+    // 对话框由 QPointer 自动管理，无需手动删除
+    
+    std::clog << "SystemTray: 析构完成" << std::endl;
 }
 
 void SystemTray::show() const
 {
+    // 延迟显示，确保 UI 完全初始化
     QTimer::singleShot(100, [this]() {
         m_trayIcon->show();
         if (!m_isAutoStartMode) {
-            m_trayIcon->showMessage("EasyTier 控制台连接器", "EasyTier 控制台连接器已启动", QSystemTrayIcon::Information, 3000);
+            m_trayIcon->showMessage(
+                "EasyTier 控制台连接器", 
+                "EasyTier 控制台连接器已启动", 
+                QSystemTrayIcon::Information, 
+                3000
+            );
         }
     });
 }
@@ -128,7 +113,7 @@ void SystemTray::setupMenu()
     
     m_separator2 = m_menu->addSeparator();
     
-    // 打开Web控制台
+    // 打开 Web 控制台
     m_openWebConsoleAction = new QAction(QIcon(":/assets/webconsole.svg"), "打开Web控制台", this);
     connect(m_openWebConsoleAction, &QAction::triggered, this, &SystemTray::onOpenWebConsole);
     m_menu->addAction(m_openWebConsoleAction);
@@ -145,8 +130,8 @@ void SystemTray::setupMenu()
     
     m_separator3 = m_menu->addSeparator();
     
-    // 开机自启（仅控制托盘程序）
-    m_autoStartAction = new QAction("开机自启", this);
+    // 开机自启
+    m_autoStartAction = new QAction("开机启动托盘", this);
     m_autoStartAction->setIcon(QIcon(":/assets/startup.svg"));
     m_autoStartAction->setCheckable(true);
     m_autoStartAction->setChecked(m_autoStart);
@@ -226,7 +211,7 @@ void SystemTray::loadSettings()
     m_connectionKey = m_configManager->getConnectionKey();
 }
 
-void SystemTray::saveSettings() const
+void SystemTray::saveSettings()
 {
     m_configManager->setAutoStart(m_autoStart);
     m_configManager->setConnectionKey(m_connectionKey);
@@ -242,33 +227,37 @@ void SystemTray::onToggleConnection()
     
     if (m_connectionState == ConnectionState::NotStarted) {
         // 启动服务
-        showProgressDialog("正在启动EasyTier服务...");
+        showProgressDialog("正在启动 EasyTier 服务...");
         updateStatus(ConnectionState::Connecting);
         
-        bool success = m_etService->start(m_connectionKey);
+        bool success = ETRunService::start(m_connectionKey);
         closeProgressDialog();
         
         if (success) {
             updateStatus(ConnectionState::Connected);
-            m_trayIcon->showMessage("EasyTier", "EasyTier 服务启动成功", QSystemTrayIcon::Information, 3000);
+            m_trayIcon->showMessage("EasyTier", "EasyTier 服务启动成功", 
+                                    QSystemTrayIcon::Information, 3000);
         } else {
             updateStatus(ConnectionState::NotStarted);
-            m_trayIcon->showMessage("错误", "EasyTier 服务启动失败", QSystemTrayIcon::Warning, 5000);
+            m_trayIcon->showMessage("错误", "EasyTier 服务启动失败", 
+                                    QSystemTrayIcon::Warning, 5000);
         }
     } else if (m_connectionState == ConnectionState::Connected) {
         // 停止服务
-        showProgressDialog("正在停止EasyTier服务...");
+        showProgressDialog("正在停止 EasyTier 服务...");
         updateStatus(ConnectionState::Connecting);
         
-        bool success = m_etService->stop();
+        bool success = ETRunService::stop();
         closeProgressDialog();
         
         if (success) {
             updateStatus(ConnectionState::NotStarted);
-            m_trayIcon->showMessage("通知", "EasyTier 服务已停止", QSystemTrayIcon::Information, 3000);
+            m_trayIcon->showMessage("通知", "EasyTier 服务已停止", 
+                                    QSystemTrayIcon::Information, 3000);
         } else {
             updateStatus(ConnectionState::Connected);
-            m_trayIcon->showMessage("错误", "EasyTier 服务停止失败", QSystemTrayIcon::Warning, 5000);
+            m_trayIcon->showMessage("错误", "EasyTier 服务停止失败", 
+                                    QSystemTrayIcon::Warning, 5000);
         }
     }
 }
@@ -278,27 +267,31 @@ void SystemTray::onOpenWebConsole()
 #ifndef IS_NOT_ET_PRO
     QDesktopServices::openUrl(QUrl("https://console.easytier.net/"));
 #else
-    QMessageBox::information(nullptr,"提示","暂不支持");
+    QMessageBox::information(nullptr, "提示", "暂不支持");
 #endif
 }
 
 void SystemTray::onSettings()
 {
-    if (m_settingsDialog == nullptr) {
+    // 创建或复用对话框
+    if (m_settingsDialog.isNull()) {
         m_settingsDialog = new SettingsDialog(m_connectionKey);
-        connect(m_settingsDialog, &SettingsDialog::connectionKeyChanged,
+        connect(m_settingsDialog.data(), &SettingsDialog::connectionKeyChanged,
                 this, &SystemTray::onConnectionKeyChanged);
     }
     
     m_settingsDialog->setConnectionKey(m_connectionKey);
+    
     if (m_settingsDialog->exec() == QDialog::Accepted) {
         m_connectionKey = m_settingsDialog->getConnectionKey();
         m_configManager->setConnectionKey(m_connectionKey);
         m_configManager->saveConfig();
     }
     
-    m_settingsDialog->deleteLater();
-    m_settingsDialog = nullptr;
+    // QPointer 会在对象删除后自动变为 nullptr
+    if (!m_settingsDialog.isNull()) {
+        m_settingsDialog->deleteLater();
+    }
 }
 
 void SystemTray::onAutoStart(bool checked)
@@ -307,14 +300,25 @@ void SystemTray::onAutoStart(bool checked)
     m_configManager->setAutoStart(m_autoStart);
     m_configManager->saveConfig();
     
+    bool success;
     if (checked) {
-        createScheduledTask();
+        success = createScheduledTask();
     } else {
-        deleteScheduledTask();
+        success = deleteScheduledTask();
+    }
+    
+    if (!success) {
+        // 操作失败，恢复 UI 状态
+        m_autoStartAction->blockSignals(true);
+        m_autoStartAction->setChecked(!checked);
+        m_autoStartAction->blockSignals(false);
+        
+        QMessageBox::warning(nullptr, "提示", 
+            checked ? "设置开机自启失败" : "取消开机自启失败");
     }
 }
 
-void SystemTray::createScheduledTask()
+bool SystemTray::createScheduledTask()
 {
     const QString appPath = QString("\"%1\"").arg(QApplication::applicationFilePath());
     const QString appName = "EasyTierConnector";
@@ -322,19 +326,27 @@ void SystemTray::createScheduledTask()
     QStringList args;
     args << "/create"
          << "/tn" << appName
-         << "/tr" << appPath
+         << "/tr" << QString("%1 --auto-start").arg(appPath)
          << "/sc" << "onlogon"
          << "/rl" << "highest"
          << "/f";
     
     QProcess process;
     process.start("schtasks.exe", args);
-    process.waitForFinished();
     
-    qDebug() << "创建开机自启任务:" << process.readAllStandardOutput();
+    if (!process.waitForFinished(10000)) {
+        std::cerr << "创建计划任务超时" << std::endl;
+        process.kill();
+        return false;
+    }
+    
+    bool success = (process.exitCode() == 0);
+    std::clog << "创建开机自启任务: " << (success ? "成功" : "失败") << " "
+              << QString::fromUtf8(process.readAllStandardOutput()).toStdString() << std::endl;
+    return success;
 }
 
-void SystemTray::deleteScheduledTask()
+bool SystemTray::deleteScheduledTask()
 {
     QStringList args;
     args << "/delete"
@@ -343,22 +355,32 @@ void SystemTray::deleteScheduledTask()
     
     QProcess process;
     process.start("schtasks.exe", args);
-    process.waitForFinished();
     
-    qDebug() << "删除开机自启任务:" << process.readAllStandardOutput();
+    if (!process.waitForFinished(10000)) {
+        std::cerr << "删除计划任务超时" << std::endl;
+        process.kill();
+        return false;
+    }
+    
+    bool success = (process.exitCode() == 0);
+    std::clog << "删除开机自启任务: " << (success ? "成功" : "失败") << " "
+              << QString::fromUtf8(process.readAllStandardOutput()).toStdString() << std::endl;
+    return success;
 }
 
 void SystemTray::onAbout()
 {
-    if (m_aboutDialog == nullptr) {
+    if (m_aboutDialog.isNull()) {
         m_aboutDialog = new AboutDialog();
     }
     m_aboutDialog->exec();
-    m_aboutDialog->deleteLater();
-    m_aboutDialog = nullptr;
+    
+    if (!m_aboutDialog.isNull()) {
+        m_aboutDialog->deleteLater();
+    }
 }
 
-void SystemTray::onQuit() const
+void SystemTray::onQuit()
 {
     saveSettings();
     QApplication::quit();
@@ -366,14 +388,29 @@ void SystemTray::onQuit() const
 
 void SystemTray::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
+    // 双击打开 Web 控制台
     if (reason == QSystemTrayIcon::DoubleClick) {
         onOpenWebConsole();
     }
 }
 
+void SystemTray::onHeartbeat()
+{
+    bool running = ETRunService::isRunning();
+    
+    // 只在状态发生变化时更新 UI，避免频繁刷新
+    if (running && m_connectionState != ConnectionState::Connected) {
+        updateStatus(ConnectionState::Connected);
+        std::clog << "SystemTray: 心跳检测 - 服务已上线" << std::endl;
+    } else if (!running && m_connectionState == ConnectionState::Connected) {
+        updateStatus(ConnectionState::NotStarted);
+        std::clog << "SystemTray: 心跳检测 - 服务已离线" << std::endl;
+    }
+}
+
 void SystemTray::onConnectionKeyChanged()
 {
-    if (m_settingsDialog == nullptr) {
+    if (m_settingsDialog.isNull()) {
         return;
     }
     
@@ -381,13 +418,30 @@ void SystemTray::onConnectionKeyChanged()
     m_configManager->setConnectionKey(m_connectionKey);
     m_configManager->saveConfig();
     
-    // 如果服务已运行，先停止再重启
-    if (m_etService->isRunning()) {
-        showProgressDialog("正在重启EasyTier服务...");
-        m_etService->stop();
-        m_etService->start(m_connectionKey);
+    // 如果服务已运行，重启服务
+    if (ETRunService::isRunning()) {
+        showProgressDialog("正在重启 EasyTier 服务...");
+        
+        bool stopped = ETRunService::stop();
+        bool started = false;
+        
+        if (stopped) {
+            // 等待资源释放
+            QThread::msleep(500);
+            started = ETRunService::start(m_connectionKey);
+        }
+        
         closeProgressDialog();
-        updateStatus(ConnectionState::Connected);
+        
+        if (started) {
+            updateStatus(ConnectionState::Connected);
+            m_trayIcon->showMessage("EasyTier", "服务已重启", 
+                                    QSystemTrayIcon::Information, 3000);
+        } else {
+            updateStatus(ConnectionState::NotStarted);
+            m_trayIcon->showMessage("错误", "服务重启失败", 
+                                    QSystemTrayIcon::Warning, 5000);
+        }
     }
 }
 
@@ -409,7 +463,7 @@ void SystemTray::closeProgressDialog()
 {
     if (m_progressDialog != nullptr) {
         m_progressDialog->close();
-        delete m_progressDialog;
+        m_progressDialog->deleteLater();
         m_progressDialog = nullptr;
     }
 }

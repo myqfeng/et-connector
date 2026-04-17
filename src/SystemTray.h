@@ -1,3 +1,14 @@
+/**
+ * @file SystemTray.h
+ * @brief 系统托盘主类 - 管理 UI 状态、菜单和信号槽协调
+ * 
+ * 核心职责：
+ * - 系统托盘图标和右键菜单管理
+ * - EasyTier 服务生命周期控制
+ * - 配置持久化
+ * - 开机自启管理
+ */
+
 #ifndef SYSTEMTRAY_H
 #define SYSTEMTRAY_H
 
@@ -6,6 +17,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QProgressDialog>
+#include <QPointer>
+#include <QTimer>
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
 #include "ETRunService.h"
@@ -13,13 +26,21 @@
 
 //#define IS_NOT_ET_PRO
 
-// 连接状态枚举
+/**
+ * @brief 连接状态枚举
+ */
 enum class ConnectionState {
-    NotStarted,     // 未启动
-    Connecting,     // 连接中
-    Connected       // 已连接
+    NotStarted,     ///< 未启动
+    Connecting,     ///< 连接中
+    Connected       ///< 已连接
 };
 
+/**
+ * @brief 系统托盘主类
+ * 
+ * 负责整体协调，管理 UI 状态和信号槽连接。
+ * 使用 QPointer 管理对话框生命周期，避免悬空指针问题。
+ */
 class SystemTray : public QObject
 {
     Q_OBJECT
@@ -33,69 +54,66 @@ public:
 
 private slots:
     void onToggleConnection();
-    static void onOpenWebConsole();
+    void onOpenWebConsole();
     void onSettings();
     void onAutoStart(bool checked);
     void onAbout();
-    void onQuit() const;
-    static void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
+    void onQuit();
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     
-    // 连接密钥变化槽函数
     void onConnectionKeyChanged();
-    
-    // 计划任务相关函数（管理托盘程序开机自启）
-    static void createScheduledTask();
-    static void deleteScheduledTask();
+    void onHeartbeat();
 
 private:
     void setupMenu();
     void updateStatus(ConnectionState state);
     void updateConnectionActions() const;
     void loadSettings();
-    void saveSettings() const;
+    void saveSettings();
     
-    // 显示进度对话框
     void showProgressDialog(const QString &text);
     void closeProgressDialog();
+    
+    // 计划任务管理（Windows 开机自启）
+    bool createScheduledTask();
+    bool deleteScheduledTask();
 
-    QSystemTrayIcon *m_trayIcon;
-    QMenu *m_menu;
+    // === 成员变量（按初始化顺序排列）===
+    
+    // 核心组件
+    ConfigManager *m_configManager = nullptr;       ///< 配置管理器
+    
+    // 托盘 UI
+    QSystemTrayIcon *m_trayIcon = nullptr;          ///< 系统托盘图标
+    QMenu *m_menu = nullptr;                        ///< 右键菜单
+    QProgressDialog *m_progressDialog = nullptr;    ///< 进度对话框
     
     // 菜单项
-    QAction *m_titleAction;
-    QAction *m_statusAction;
-    QAction *m_separator1;
-    QAction *m_toggleConnectionAction;
-    QAction *m_separator2;
-    QAction *m_openWebConsoleAction;
-    QAction *m_settingsAction;
-    QAction *m_separator3;
-    QAction *m_autoStartAction;
-    QAction *m_separator4;
-    QAction *m_aboutAction;
-    QAction *m_quitAction;
+    QAction *m_titleAction = nullptr;
+    QAction *m_statusAction = nullptr;
+    QAction *m_separator1 = nullptr;
+    QAction *m_toggleConnectionAction = nullptr;
+    QAction *m_separator2 = nullptr;
+    QAction *m_openWebConsoleAction = nullptr;
+    QAction *m_settingsAction = nullptr;
+    QAction *m_separator3 = nullptr;
+    QAction *m_autoStartAction = nullptr;
+    QAction *m_separator4 = nullptr;
+    QAction *m_aboutAction = nullptr;
+    QAction *m_quitAction = nullptr;
     
-    // 状态
-    ConnectionState m_connectionState;
-    bool m_autoStart;           // 是否开机启动托盘程序
-    bool m_isAutoStartMode;     // 是否从开机自启启动
-    QString m_connectionKey;
+    // 对话框（使用 QPointer 自动管理，避免悬空指针）
+    QPointer<SettingsDialog> m_settingsDialog;
+    QPointer<AboutDialog> m_aboutDialog;
     
-    // 设置
-    QSettings *m_settings;
+    // 状态变量
+    ConnectionState m_connectionState = ConnectionState::NotStarted;
+    bool m_autoStart = false;           ///< 是否开机启动托盘程序
+    bool m_isAutoStartMode = false;     ///< 是否从开机自启启动
+    QString m_connectionKey;            ///< 连接密钥
     
-    // 对话框 (懒加载)
-    SettingsDialog *m_settingsDialog = nullptr;
-    AboutDialog *m_aboutDialog = nullptr;
-    
-    // EasyTier服务管理器
-    ETRunService *m_etService;
-    
-    // 配置管理器
-    ConfigManager *m_configManager;
-    
-    // 进度对话框
-    QProgressDialog *m_progressDialog = nullptr;
+    // 心跳定时器
+    QTimer *m_heartbeatTimer = nullptr; ///< 每2秒检测 easytier-core 进程状态
 };
 
 #endif // SYSTEMTRAY_H

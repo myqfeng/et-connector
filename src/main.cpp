@@ -1,44 +1,89 @@
+/**
+ * @file main.cpp
+ * @brief EasyTier 控制台连接器程序入口
+ * 
+ * 功能：
+ * - 单实例检测（基于本地套接字）
+ * - 命令行参数解析
+ * - 系统托盘初始化
+ */
+
 #include <QApplication>
 #include <QSystemTrayIcon>
 #include <QFont>
-#include <QThread>
 #include <QCommandLineParser>
 #include <QLocalSocket>
 #include <QLocalServer>
 #include <QMessageBox>
+#include <iostream>
 #include "SystemTray.h"
 
-int main(int argc, char *argv[])
+/**
+ * @brief 检查是否已有实例运行
+ * @param serverName 本地套接字名称
+ * @return true 如果已有实例运行
+ */
+static bool isInstanceRunning(const QString &serverName)
 {
-
-    QApplication app(argc, argv);
-    
-    // 设置全局默认字体大小为10px
-    QFont defaultFont = app.font();
-    defaultFont.setPointSize(10);
-    app.setFont(defaultFont);
-    
-    app.setApplicationName("EasyTier Connector");
-    app.setApplicationVersion("0.0.4");
-    app.setQuitOnLastWindowClosed(false); // 关闭窗口时不退出应用
-    
-    // 单实例检测：尝试连接已存在的本地套接字
-    const QString &serverName = "QtETWebConnector-By-Myqfeng";
     QLocalSocket checkSocket;
     checkSocket.connectToServer(serverName, QIODevice::WriteOnly);
     
     if (checkSocket.waitForConnected(500)) {
-        // 连接成功，说明已有实例运行
         checkSocket.disconnectFromServer();
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @brief 创建单实例锁定的本地服务器
+ * @param app QApplication 实例
+ * @param serverName 本地套接字名称
+ * @return 创建成功返回服务器指针，失败返回 nullptr
+ */
+static QLocalServer* createSingletonServer(QApplication &app, const QString &serverName)
+{
+    auto *server = new QLocalServer(&app);
+    // 移除可能残留的服务器文件（Linux/macOS 需要，Windows 无害）
+    QLocalServer::removeServer(serverName);
+    
+    if (!server->listen(serverName)) {
+        std::cerr << "无法创建单实例服务器: " << server->errorString().toStdString() << std::endl;
+        delete server;
+        return nullptr;
+    }
+    
+    return server;
+}
+
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+    
+    // 设置应用程序元信息
+    app.setApplicationName("EasyTier Connector");
+    app.setApplicationVersion("0.0.4");
+    app.setQuitOnLastWindowClosed(false);
+    
+    // 设置全局默认字体大小
+    QFont defaultFont = app.font();
+    defaultFont.setPointSize(10);
+    app.setFont(defaultFont);
+    
+    // 单实例检测
+    const QString serverName = "QtETWebConnector-By-Myqfeng";
+    if (isInstanceRunning(serverName)) {
         QMessageBox::information(nullptr, "EasyTier Connector", "程序已在运行！");
         return 0;
     }
     
-    // 无实例运行，创建本地服务器用于后续实例检测
-    QLocalServer *localServer = new QLocalServer(&app);
-    // 移除可能残留的服务器文件（Linux/macOS需要）
-    QLocalServer::removeServer(serverName);
-    localServer->listen(serverName);
+    // 创建单实例锁定服务器
+    QLocalServer *localServer = createSingletonServer(app, serverName);
+    if (!localServer) {
+        QMessageBox::warning(nullptr, "EasyTier Connector", 
+                             "无法初始化单实例锁定，程序可能已在运行。");
+        // 继续运行，因为可能是权限问题
+    }
     
     // 解析命令行参数
     QCommandLineParser parser;
@@ -46,20 +91,16 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
     
-    // 添加 --auto-start 选项
     QCommandLineOption autoStartOption(
         QStringList() << "auto-start",
-        "开机自启模式启动"
+        "开机自启模式启动（不显示启动通知）"
     );
     parser.addOption(autoStartOption);
-    
     parser.process(app);
     
-    bool isAutoStart = parser.isSet(autoStartOption);
-    
-    // 创建系统托盘（使用栈对象自动管理生命周期）
+    // 创建系统托盘
     SystemTray tray;
-    tray.setAutoStartMode(isAutoStart);
+    tray.setAutoStartMode(parser.isSet(autoStartOption));
     tray.show();
 
     return app.exec();

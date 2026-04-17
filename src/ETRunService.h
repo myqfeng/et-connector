@@ -1,48 +1,106 @@
 /**
- * @brief EasyTier Core 服务管理器
+ * @file ETRunService.h
+ * @brief EasyTier Core 系统服务管理器
  * 
  * 通过 easytier-cli.exe 管理 EasyTier Core 系统服务。
  * 服务安装后默认开机自启。
+ * 
+ * 设计说明：
+ * - 由于所有方法都是静态的，不需要继承 QObject
+ * - 使用 CommandResult 结构体封装命令执行结果
  */
 
 #ifndef ETRUNSERVICE_H
 #define ETRUNSERVICE_H
 
-#include <QObject>
-#include <QProcess>
+#include <QString>
+#include <QStringList>
+
+/**
+ * @brief 命令执行结果结构体
+ */
+struct CommandResult {
+    int exitCode = -1;          ///< 进程退出码，-1 表示执行失败
+    QString output;             ///< 标准输出和标准错误的合并内容
+    bool success = false;       ///< 是否执行成功（exitCode == 0）
+    QString errorString;        ///< 错误描述（如果有）
+    
+    [[nodiscard]] bool outputContains(const QString &text) const {
+        return output.contains(text, Qt::CaseInsensitive);
+    }
+};
 
 /**
  * @brief EasyTier Core 系统服务管理器
+ * 
+ * 提供静态方法管理 Windows 系统服务。
+ * 服务名称: "QtET Web Connector"
  */
-class ETRunService : public QObject
+class ETRunService
 {
-    Q_OBJECT
-
 public:
-    explicit ETRunService(QObject *parent = nullptr);
-    ~ETRunService() override;
+    ETRunService() = default;
+    ~ETRunService() = default;
     
-    // 启动服务（未安装则自动安装并启动）返回是否成功
+    // 禁止拷贝
+    ETRunService(const ETRunService&) = delete;
+    ETRunService& operator=(const ETRunService&) = delete;
+    
+    /**
+     * @brief 启动服务
+     * @param connectionKey 连接密钥
+     * @return 是否启动成功
+     * 
+     * 如果服务未安装，会自动安装后启动。
+     */
     static bool start(const QString &connectionKey);
     
-    // 停止服务并卸载，返回是否成功
+    /**
+     * @brief 停止并卸载服务
+     * @return 是否停止成功
+     */
     static bool stop();
     
-    // 查询服务是否正在运行
-    bool isRunning();
+    /**
+     * @brief 查询 easytier-core 进程是否正在运行
+     * @return 进程是否存在
+     */
+    static bool isRunning();
+    
+    /**
+     * @brief 检查服务是否已安装
+     * @return 服务是否已安装
+     */
+    static bool isServiceInstalled();
+    
+    /**
+     * @brief 获取 easytier-cli.exe 路径
+     * @return CLI 工具完整路径
+     */
+    static QString getCliPath();
+    
+    /**
+     * @brief 获取工作目录
+     * @return etcore 目录路径
+     */
+    static QString getWorkingDirectory();
+    
+    /**
+     * @brief 执行命令并等待完成
+     * @param command 命令路径
+     * @param args 命令参数
+     * @param timeoutMs 超时时间（毫秒），默认 30 秒
+     * @return 命令执行结果
+     */
+    static CommandResult executeCommand(const QString &command, 
+                                        const QStringList &args,
+                                        int timeoutMs = 30000);
 
 private:
-    // 获取 easytier-cli.exe 路径
-    static QString getCliPath() ;
-    
-    // 获取工作目录
-    static QString getWorkingDirectory() ;
-    
-    // 执行命令并等待完成，返回退出码和输出
-    static int executeCommand(const QString &command, const QStringList &args, QString &output);
-    
-    // 检查服务是否已安装
-    static bool isServiceInstalled() ;
+    /// Windows 服务内部名称（不含空格）
+    static constexpr const char* SERVICE_NAME = "QtETWebConnector";
+    /// 服务显示名称
+    static constexpr const char* SERVICE_DISPLAY_NAME = "QtETWebConnector";
 };
 
 #endif // ETRUNSERVICE_H
