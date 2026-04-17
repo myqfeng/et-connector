@@ -196,7 +196,7 @@ void SystemTray::setupMenu()
     m_menu->addAction(m_aboutAction);
     
     // 退出
-    m_quitAction = new QAction(QIcon(":/assets/quit.svg"), "退出软件", this);
+    m_quitAction = new QAction(QIcon(":/assets/quit.svg"), "退出托盘程序", this);
     connect(m_quitAction, &QAction::triggered, this, &SystemTray::onQuit);
     m_menu->addAction(m_quitAction);
 }
