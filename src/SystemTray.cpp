@@ -27,10 +27,43 @@ SystemTray::SystemTray(QObject *parent)
     
     // 1.5. 初始化 Casdoor 登录器
     m_casdoorLogin = new CasdoorLogin("d3ff87a9cd6317695066", this);
-    connect(m_casdoorLogin, &CasdoorLogin::loginSuccess, this, [this](const QString &accessToken, const QString &idToken) {
-        // 登录成功，显示对话框显示 token
-        QString message = "Access Token:\n" + accessToken + "\n\nID Token:\n" + idToken;
-        QMessageBox::information(nullptr, "登录成功", message);
+    connect(m_casdoorLogin, &CasdoorLogin::loginSuccess, this, [this](const QString &deviceKey, const QString &displayName) {
+        // 拼接完整的连接地址密钥字符串
+        QString fullConnectionKey = QString("tcp://et-web.console.easytier.net:22020/%1").arg(deviceKey);
+        
+        // 更新配置
+        m_connectionKey = fullConnectionKey;
+        m_configManager->setConnectionKey(m_connectionKey);
+        m_configManager->saveConfig();
+        
+        // 如果服务正在运行，先停止服务，然后启动服务（使用新密钥）
+        if (ETRunService::isRunning()) {
+            showProgressDialog("正在重启 EasyTier 服务...");
+            
+            bool stopped = ETRunService::stop();
+            bool started = false;
+            
+            if (stopped) {
+                QThread::msleep(500);  // 等待资源释放
+                started = ETRunService::start(m_connectionKey);
+            }
+            
+            closeProgressDialog();
+            
+            if (started) {
+                updateStatus(ConnectionState::Connected);
+                m_trayIcon->showMessage("EasyTier", "服务已使用新密钥重启", 
+                                        QSystemTrayIcon::Information, 3000);
+            } else {
+                updateStatus(ConnectionState::NotStarted);
+                m_trayIcon->showMessage("错误", "服务重启失败", 
+                                        QSystemTrayIcon::Warning, 5000);
+            }
+        } else {
+            // 服务未运行，直接提示用户手动启动
+            m_trayIcon->showMessage("登录成功", "密钥已更新，请点击'启动连接'以启动服务", 
+                                    QSystemTrayIcon::Information, 3000);
+        }
     });
     connect(m_casdoorLogin, &CasdoorLogin::loginFailed, this, [this](const QString &errorMessage) {
         QMessageBox::warning(nullptr, "登录失败", errorMessage);

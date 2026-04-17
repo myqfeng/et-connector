@@ -12,6 +12,13 @@
 #include <QTcpSocket>
 #include <QNetworkReply>
 #include <QJsonDocument>
+#include <QJsonArray>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QMessageBox>
 
 // 静态成员初始化
 const QString CasdoorLogin::CALLBACK_URL = "http://127.0.0.1:54321/callback";
@@ -200,11 +207,13 @@ void CasdoorLogin::swapCodeForToken(const QString &code)
 
         // 提取令牌
         QString accessToken = obj["access_token"].toString();
-        QString idToken = obj["id_token"].toString();
 
         if (!accessToken.isEmpty()) {
-            // 登录成功
-            emit loginSuccess(accessToken, idToken);
+            // 保存 access_token 供后续使用
+            m_accessToken = accessToken;
+            
+            // 开始获取租户信息
+            fetchTenants(accessToken);
         } else {
             emit loginFailed("未获取到访问令牌");
         }
@@ -301,4 +310,238 @@ void CasdoorLogin::onLoginTimeout()
 
     emit loginFailed("登录超时，请在60秒内完成登录");
 
+}
+
+void CasdoorLogin::fetchTenants(const QString &accessToken)
+{
+    QUrl url("https://api.console.easytier.net/api/v1/auth/me");
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
+    
+    m_networkManager->get(request);
+    
+    // 断开之前的 finished 连接，避免多次触发
+    disconnect(m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+    
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, [this](QNetworkReply *reply) {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            emit loginFailed("获取租户信息失败: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray responseData = reply->readAll();
+        QJsonParseError parseError;
+        QJsonDocument json = QJsonDocument::fromJson(responseData, &parseError);
+        
+        if (parseError.error != QJsonParseError::NoError) {
+            emit loginFailed("解析租户信息失败: " + parseError.errorString());
+            return;
+        }
+        
+        QJsonObject obj = json.object();
+        QJsonArray tenantsArray = obj["tenants"].toArray();
+        
+        QList<TenantInfo> tenants;
+        for (const QJsonValue &value : tenantsArray) {
+            QJsonObject tenantObj = value.toObject();
+            TenantInfo info;
+            info.id = tenantObj["id"].toString();
+            info.name = tenantObj["name"].toString();
+            tenants.append(info);
+        }
+        
+        if (tenants.isEmpty()) {
+            emit loginFailed("未找到任何组织，请确保您有访问权限");
+            return;
+        }
+        
+        // 显示组织选择对话框
+        int selectedIndex = showTenantSelectionDialog(tenants);
+        if (selectedIndex >= 0 && selectedIndex < tenants.size()) {
+            // 用户选择了组织，获取该组织的密钥列表
+            fetchDeviceEnrollmentKeys(m_accessToken, tenants[selectedIndex].id);
+        } else {
+            // 用户取消选择
+            emit loginFailed("用户取消了选择");
+        }
+    });
+}
+
+void CasdoorLogin::fetchDeviceEnrollmentKeys(const QString &accessToken, const QString &tenantId)
+{
+    QUrl url(QString("https://api.console.easytier.net/api/v1/tenants/%1/device-enrollment-keys").arg(tenantId));
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
+    
+    m_networkManager->get(request);
+    
+    // 断开之前的 finished 连接
+    disconnect(m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+    
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, [this, tenantId](QNetworkReply *reply) {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            emit loginFailed("获取密钥列表失败: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray responseData = reply->readAll();
+        QJsonParseError parseError;
+        QJsonDocument json = QJsonDocument::fromJson(responseData, &parseError);
+        
+        if (parseError.error != QJsonParseError::NoError) {
+            emit loginFailed("解析密钥列表失败: " + parseError.errorString());
+            return;
+        }
+        
+        QJsonArray keysArray = json.array();
+        
+        QList<DeviceKeyInfo> keys;
+        for (const QJsonValue &value : keysArray) {
+            QJsonObject keyObj = value.toObject();
+            
+            // 跳过已撤销的密钥
+            if (keyObj["revoked"].toBool()) {
+                continue;
+            }
+            
+            DeviceKeyInfo info;
+            info.id = keyObj["id"].toString();
+            info.displayName = keyObj["display_name"].toString();
+            info.keyCode = keyObj["key_code"].toString();
+            keys.append(info);
+        }
+        
+        if (keys.isEmpty()) {
+            emit loginFailed("未找到任何可用的设备接入密钥，请先在控制台创建密钥");
+            return;
+        }
+        
+        // 显示密钥选择对话框
+        int selectedIndex = showKeySelectionDialog(keys);
+        if (selectedIndex >= 0 && selectedIndex < keys.size()) {
+            // 用户选择了密钥，获取真实密钥
+            fetchDeviceKeySecret(m_accessToken, tenantId, keys[selectedIndex].id, keys[selectedIndex].displayName);
+        } else {
+            // 用户取消选择
+            emit loginFailed("用户取消了选择");
+        }
+    });
+}
+
+void CasdoorLogin::fetchDeviceKeySecret(const QString &accessToken, const QString &tenantId, const QString &keyId, const QString &displayName)
+{
+    QUrl url(QString("https://api.console.easytier.net/api/v1/tenants/%1/device-enrollment-keys/%2/secret").arg(tenantId).arg(keyId));
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(accessToken).toUtf8());
+    
+    m_networkManager->get(request);
+    
+    // 断开之前的 finished 连接
+    disconnect(m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+    
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, [this, displayName](QNetworkReply *reply) {
+        reply->deleteLater();
+        
+        if (reply->error() != QNetworkReply::NoError) {
+            emit loginFailed("获取密钥详情失败: " + reply->errorString());
+            return;
+        }
+        
+        QByteArray responseData = reply->readAll();
+        QJsonParseError parseError;
+        QJsonDocument json = QJsonDocument::fromJson(responseData, &parseError);
+        
+        if (parseError.error != QJsonParseError::NoError) {
+            emit loginFailed("解析密钥详情失败: " + parseError.errorString());
+            return;
+        }
+        
+        QJsonObject obj = json.object();
+        QString deviceKey = obj["bootstrap_token"].toString();
+        
+        if (deviceKey.isEmpty()) {
+            emit loginFailed("未获取到设备接入密钥");
+            return;
+        }
+        
+        // 登录成功，发送设备接入密钥
+        emit loginSuccess(deviceKey, displayName);
+    });
+}
+
+int CasdoorLogin::showTenantSelectionDialog(const QList<TenantInfo> &tenants)
+{
+    QDialog dialog;
+    dialog.setWindowTitle("请选择组织");
+    dialog.setMinimumWidth(400);
+    
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    
+    QLabel *label = new QLabel("请选择您要使用的组织：", &dialog);
+    layout->addWidget(label);
+    
+    QListWidget *listWidget = new QListWidget(&dialog);
+    for (const TenantInfo &tenant : tenants) {
+        listWidget->addItem(tenant.name);
+    }
+    listWidget->setCurrentRow(0);
+    layout->addWidget(listWidget);
+    
+    QPushButton *okButton = new QPushButton("确定", &dialog);
+    QPushButton *cancelButton = new QPushButton("取消", &dialog);
+    
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
+    
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        return listWidget->currentRow();
+    }
+    return -1;
+}
+
+int CasdoorLogin::showKeySelectionDialog(const QList<DeviceKeyInfo> &keys)
+{
+    QDialog dialog;
+    dialog.setWindowTitle("请选择设备接入密钥");
+    dialog.setMinimumWidth(400);
+    
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    
+    QLabel *label = new QLabel("请选择您要使用的设备接入密钥：", &dialog);
+    layout->addWidget(label);
+    
+    QListWidget *listWidget = new QListWidget(&dialog);
+    for (const DeviceKeyInfo &key : keys) {
+        QString itemText = QString("%1 (%2)").arg(key.displayName, key.keyCode);
+        listWidget->addItem(itemText);
+    }
+    listWidget->setCurrentRow(0);
+    layout->addWidget(listWidget);
+    
+    QPushButton *okButton = new QPushButton("确定", &dialog);
+    QPushButton *cancelButton = new QPushButton("取消", &dialog);
+    
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
+    
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        return listWidget->currentRow();
+    }
+    return -1;
 }

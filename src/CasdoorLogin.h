@@ -62,10 +62,10 @@ private slots:
 signals:
     /**
      * @brief 登录成功信号
-     * @param accessToken 访问令牌
-     * @param idToken ID 令牌
+     * @param deviceKey 设备接入密钥（etk 开头）
+     * @param displayName 密钥显示名称
      */
-    void loginSuccess(const QString &accessToken, const QString &idToken);
+    void loginSuccess(const QString &deviceKey, const QString &displayName);
     
     /**
      * @brief 登录失败信号
@@ -75,10 +75,63 @@ signals:
 
 private:
     /**
+     * @brief 组织信息结构
+     */
+    struct TenantInfo {
+        QString id;
+        QString name;
+    };
+    
+    /**
+     * @brief 设备接入密钥信息结构
+     */
+    struct DeviceKeyInfo {
+        QString id;
+        QString displayName;
+        QString keyCode;
+    };
+
+    /**
      * @brief 用授权码交换访问令牌
      * @param code 授权码
      */
     void swapCodeForToken(const QString &code);
+    
+    /**
+     * @brief 获取租户（组织）信息
+     * @param accessToken 访问令牌
+     */
+    void fetchTenants(const QString &accessToken);
+    
+    /**
+     * @brief 获取设备接入密钥列表
+     * @param accessToken 访问令牌
+     * @param tenantId 组织 ID
+     */
+    void fetchDeviceEnrollmentKeys(const QString &accessToken, const QString &tenantId);
+    
+    /**
+     * @brief 获取设备接入密钥详情（真实密钥）
+     * @param accessToken 访问令牌
+     * @param tenantId 组织 ID
+     * @param keyId 密钥 ID
+     * @param displayName 密钥显示名称
+     */
+    void fetchDeviceKeySecret(const QString &accessToken, const QString &tenantId, const QString &keyId, const QString &displayName);
+    
+    /**
+     * @brief 显示组织选择对话框
+     * @param tenants 组织列表
+     * @return 选中的组织索引，-1 表示取消
+     */
+    int showTenantSelectionDialog(const QList<TenantInfo> &tenants);
+    
+    /**
+     * @brief 显示密钥选择对话框
+     * @param keys 密钥列表
+     * @return 选中的密钥索引，-1 表示取消
+     */
+    int showKeySelectionDialog(const QList<DeviceKeyInfo> &keys);
     
     /**
      * @brief 生成随机字符串（用于 state 和 code verifier）
@@ -102,6 +155,7 @@ private:
     
     QString m_codeVerifier;                   ///< PKCE code verifier
     QString m_state;                          ///< OAuth state 参数
+    QString m_accessToken;                    ///< 访问令牌
 
     static constexpr int TIME_OUT = 60000;     ///< 登录超时时间（60秒）
     static constexpr int CALLBACK_PORT = 54321; ///< 回调服务器端口
