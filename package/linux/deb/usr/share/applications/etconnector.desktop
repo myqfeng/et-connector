@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=EasyTier Connector
+Comment=EasyTier Web Connector
+Exec=/opt/etconnector/EasyTierConnector
+Icon=/opt/etconnector/favicon.png
+Terminal=false
+Categories=Utility;Qt;Web;Network;Internet;

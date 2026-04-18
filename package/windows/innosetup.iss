@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "EasyTier Connector"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "EasyTier"
 #define MyAppURL "https://easytier.cn"
 #define MyAppExeName "EasyTierConnector.exe"
@@ -40,7 +40,7 @@ ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile={#ProjectDir}\LICENSE
-InfoBeforeFile={#ProjectDir}\assets\introduction.rtf
+InfoBeforeFile={#ProjectDir}\package\windows\introduction.rtf
 ; 强制要求管理员权限（安装和卸载都需要）
 PrivilegesRequired=admin
 OutputDir={#ProjectDir}\Install
