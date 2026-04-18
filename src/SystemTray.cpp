@@ -13,6 +13,7 @@
 #include <QThread>
 #include <QProcess>
 #include <iostream>
+#include <QDir>
 #include <QRegularExpression>
 
 SystemTray::SystemTray(QObject *parent)
@@ -491,41 +492,79 @@ void SystemTray::onAutoStart(bool checked)
 bool SystemTray::registerAutoStart()
 {
     const QString appPath = QApplication::applicationFilePath();
-    QString value = QString("\"%1\" --auto-start").arg(appPath);
 
-    // 在Windows下要改成反斜杠路径
 #ifdef Q_OS_WIN32
+    QString value = QString("\"%1\" --auto-start").arg(appPath);
     value.replace('/', '\\');
-#endif
 
-    
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
     settings.setValue("EasyTierConnector", value);
     settings.sync();
-    
+
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "注册开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#else
+    // Linux: 使用 ~/.config/autostart/ 目录下的 .desktop 文件
+    QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
+    QDir autostartDir(QDir::homePath() + "/.config/autostart");
+    if (!autostartDir.exists()) {
+        autostartDir.mkpath(".");
+    }
+
+    QString desktopEntry = QString("[Desktop Entry]\n"
+                                   "Type=Application\n"
+                                   "Name=EasyTierConnector\n"
+                                   "Exec=%1 --auto-start\n"
+                                   "Hidden=false\n"
+                                   "NoDisplay=false\n"
+                                   "X-GNOME-Autostart-enabled=true\n")
+                               .arg(appPath);
+
+    QFile desktopFile(desktopFilePath);
+    if (!desktopFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        std::cerr << "注册开机自启: 失败，无法写入 .desktop 文件" << std::endl;
+        return false;
+    }
+
+    desktopFile.write(desktopEntry.toUtf8());
+    desktopFile.close();
+
+    std::clog << "注册开机自启: 成功" << std::endl;
+    return true;
+#endif
 }
 
 bool SystemTray::unregisterAutoStart()
 {
+#ifdef Q_OS_WIN32
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
     settings.remove("EasyTierConnector");
     settings.sync();
-    
+
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#else
+    QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
+    bool success = QFile::remove(desktopFilePath);
+    std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
+    return success;
+#endif
 }
 
 bool SystemTray::isAutoStartRegistered()
 {
+#ifdef Q_OS_WIN32
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
     return settings.contains("EasyTierConnector");
+#else
+    QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
+    return QFile::exists(desktopFilePath);
+#endif
 }
 
 void SystemTray::onAbout()

@@ -19,10 +19,10 @@
 #endif
 
 /**
- * @brief 以管理员权限执行命令（通过 UAC 提权）
+ * @brief 以管理员权限执行命令（通过 UAC/pkexec 提权）
  *
- * 使用 ShellExecuteExW 配合 "runas" 动词触发 UAC 提示框。
- * 用户确认后以管理员权限运行程序。
+ * Windows: 使用 ShellExecuteExW 配合 "runas" 动词触发 UAC 提示框。
+ * Linux: 使用 pkexec 提权执行命令。
  *
  * @param program 程序路径
  * @param arguments 参数列表
@@ -33,13 +33,14 @@ static bool executeElevated(const QString &program,
                             const QStringList &arguments,
                             const QString &workingDir)
 {
+#ifdef Q_OS_WIN32
     // 转换为 Windows 原生路径格式
     QString nativeProgram = QDir::toNativeSeparators(program);
     QString nativeWorkingDir = QDir::toNativeSeparators(workingDir);
     QString args = arguments.join(' ');
-    
+
     std::clog << "ETRunService: 执行 UAC 提权命令: " << nativeProgram.toStdString() << " " << args.toStdString() << std::endl;
-    
+
     // 初始化 SHELLEXECUTEINFOW 结构体
     SHELLEXECUTEINFOW sei = {0};
     sei.cbSize = sizeof(SHELLEXECUTEINFOW);
@@ -50,55 +51,100 @@ static bool executeElevated(const QString &program,
     sei.lpParameters = args.isEmpty() ? nullptr : reinterpret_cast<LPCWSTR>(args.utf16());
     sei.lpDirectory = nativeWorkingDir.isEmpty() ? nullptr : reinterpret_cast<LPCWSTR>(nativeWorkingDir.utf16());
     sei.nShow = SW_HIDE;  // 隐藏窗口
-    
+
     // 执行 ShellExecuteExW
     if (!ShellExecuteExW(&sei)) {
         DWORD error = GetLastError();
         std::cerr << "ETRunService: ShellExecuteExW 失败, 错误码: " << error << std::endl;
         return false;
     }
-    
+
     // 等待进程完成
     if (sei.hProcess) {
         DWORD waitResult = WaitForSingleObject(sei.hProcess, 120000);  // 2分钟超时
-        
+
         if (waitResult == WAIT_TIMEOUT) {
             TerminateProcess(sei.hProcess, 1);
             CloseHandle(sei.hProcess);
             std::cerr << "ETRunService: UAC 提权命令执行超时" << std::endl;
             return false;
         }
-        
+
         // 获取退出码
         DWORD exitCode = 0;
         if (GetExitCodeProcess(sei.hProcess, &exitCode)) {
             std::clog << "ETRunService: UAC 提权命令退出码: " << exitCode << std::endl;
         }
-        
+
         CloseHandle(sei.hProcess);
-        
+
         // 用户取消 UAC 时，exitCode 通常为 1223 (ERROR_CANCELLED)
         if (exitCode == 1223) {
             std::cerr << "ETRunService: 用户取消了 UAC 授权" << std::endl;
             return false;
         }
-        
+
         return exitCode == 0;
     }
-    
+
     return true;
+#else
+    // Linux: 使用 pkexec 提权
+    QStringList pkexecArgs;
+    pkexecArgs << program << arguments;
+
+    std::clog << "ETRunService: 执行 pkexec 提权命令: pkexec " << program.toStdString() << " " << arguments.join(' ').toStdString() << std::endl;
+
+    QProcess process;
+    process.setWorkingDirectory(workingDir);
+    process.start("pkexec", pkexecArgs);
+
+    if (!process.waitForStarted(5000)) {
+        std::cerr << "ETRunService: pkexec 启动失败: " << process.errorString().toStdString() << std::endl;
+        return false;
+    }
+
+    if (!process.waitForFinished(120000)) {
+        process.kill();
+        process.waitForFinished(3000);
+        std::cerr << "ETRunService: pkexec 命令执行超时" << std::endl;
+        return false;
+    }
+
+    int exitCode = process.exitCode();
+    std::clog << "ETRunService: pkexec 命令退出码: " << exitCode << std::endl;
+
+    // pkexec 用户取消时退出码通常为 126
+    if (exitCode == 126) {
+        std::cerr << "ETRunService: 用户取消了 pkexec 授权" << std::endl;
+        return false;
+    }
+
+    if (exitCode != 0) {
+        QString errOutput = QString::fromUtf8(process.readAllStandardError());
+        if (!errOutput.isEmpty()) {
+            std::cerr << "ETRunService: pkexec 错误输出: " << errOutput.toStdString() << std::endl;
+        }
+    }
+
+    return exitCode == 0;
+#endif
 }
 
 QString ETRunService::getCliPath()
 {
     QString appDir = QCoreApplication::applicationDirPath();
+#ifdef Q_OS_WIN32
     return QDir::toNativeSeparators(appDir + "/etcore/easytier-cli.exe");
+#else
+    return appDir + "/etcore/easytier-cli";
+#endif
 }
 
 QString ETRunService::getWorkingDirectory()
 {
     QString appDir = QCoreApplication::applicationDirPath();
-    return QDir::toNativeSeparators(appDir + "/etcore");
+    return appDir + "/etcore";
 }
 
 CommandResult ETRunService::executeCommand(const QString &command, 
@@ -136,12 +182,18 @@ CommandResult ETRunService::executeCommand(const QString &command,
 
 bool ETRunService::isServiceInstalled()
 {
+#ifdef Q_OS_WIN32
     QSettings settings(
-        R"(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services)", 
+        R"(HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services)",
         QSettings::NativeFormat
     );
-    
+
     return settings.childGroups().contains(SERVICE_NAME);
+#else
+    // Linux: 检查 systemd 服务单元文件是否存在
+    QString serviceFilePath = QString("/etc/systemd/system/%1.service").arg(SERVICE_NAME);
+    return QFile::exists(serviceFilePath);
+#endif
 }
 
 bool ETRunService::start(const QString &connectionKey)
@@ -153,7 +205,7 @@ bool ETRunService::start(const QString &connectionKey)
     
     QString cliPath = getCliPath();
     if (!QFile::exists(cliPath)) {
-        std::cerr << "ETRunService::start: 找不到 easytier-cli.exe: " << cliPath.toStdString() << std::endl;
+        std::cerr << "ETRunService::start: 找不到 easytier-cli: " << cliPath.toStdString() << std::endl;
         return false;
     }
     
@@ -165,18 +217,17 @@ bool ETRunService::start(const QString &connectionKey)
         return true;
     }
     
-    // 如果服务未安装，合并安装+启动为一条 cmd /c 命令，只需一次 UAC 授权
+    // 如果服务未安装，合并安装+启动
     if (!isServiceInstalled()) {
         const QString hostname = QSysInfo::machineHostName();
-        const QString workPath = getWorkingDirectory()+ "/easytier-deamon.exe";
         
-        // 构造安装命令
+#ifdef Q_OS_WIN32
+        // Windows: 使用 cmd /c 串联安装和启动命令
+        const QString workPath = getWorkingDirectory() + "/easytier-deamon.exe";
         QString installCmd = QString("\"%1\" service install --core-path \"%2\" --display-name \"%3\" -- -w \"%4\" --hostname \"%5\" --secure-mode true")
                                  .arg(cliPath, workPath, SERVICE_NAME, connectionKey, hostname);
-        // 构造启动命令
         QString startCmd = QString("\"%1\" service start").arg(cliPath);
         
-        // 使用 cmd /c 串联：install 成功后才执行 start (&&)
         QStringList args;
         args << "/c" << QString("\"%1 && %2\"").arg(installCmd, startCmd);
         
@@ -188,36 +239,72 @@ bool ETRunService::start(const QString &connectionKey)
         }
         
         std::clog << "ETRunService: 安装并启动服务成功" << std::endl;
-    } else {
-        // 服务已安装：直接启动（只需一次 UAC 授权）
+        return true;
+#else
+        // Linux: 构造复合命令，用 && 连接安装和启动
+        QStringList installArgs;
+        installArgs << "service" << "-n" << SERVICE_NAME << "install" << "--core-path";
+        installArgs << (getWorkingDirectory() + "/easytier-deamon");
+        installArgs << "--display-name" << SERVICE_NAME;
+        installArgs << "--" << "-w" << connectionKey << "--hostname" << hostname << "--secure-mode" << "true";
+        
         QStringList startArgs;
-        startArgs << "service" << "start";
+        startArgs << "service" << "-n" << SERVICE_NAME << "start";
         
-        std::clog << "ETRunService: 启动服务 (需要UAC授权), 参数: " << startArgs.join(" ").toStdString() << std::endl;
+        // 构造复合命令: install && start
+        QString combinedCmd = QString("\"%1\" %2 && \"%1\" %3")
+                                 .arg(cliPath)
+                                 .arg(installArgs.join(" "))
+                                 .arg(startArgs.join(" "));
         
+        std::clog << "ETRunService: 安装并启动服务 (需要pkexec授权)" << std::endl;
+        std::clog << "复合命令: " << combinedCmd.toStdString() << std::endl;
+        
+        // 使用 bash -c 执行复合命令
+        QStringList bashArgs;
+        bashArgs << "-c" << combinedCmd;
+        
+        if (!executeElevated("bash", bashArgs, workDir)) {
+            std::cerr << "ETRunService: 安装并启动服务失败" << std::endl;
+            return false;
+        }
+        
+        std::clog << "ETRunService: 安装并启动服务成功" << std::endl;
+        return true;
+#endif
+    } else {
+        // 服务已安装：直接启动（只需一次提权授权）
+        QStringList startArgs;
+        startArgs << "service";
+#ifndef Q_OS_WIN32
+        startArgs << "-n" << SERVICE_NAME;
+#endif
+        startArgs << "start";
+
+        std::clog << "ETRunService: 启动服务 (需要提权授权), 参数: " << startArgs.join(" ").toStdString() << std::endl;
+
         if (!executeElevated(cliPath, startArgs, workDir)) {
             std::cerr << "ETRunService: 服务启动失败" << std::endl;
             return false;
         }
-        
+
         std::clog << "ETRunService: 服务启动成功" << std::endl;
+        return true;
     }
-    
-    return true;
 }
 
 bool ETRunService::stop()
 {
     QString cliPath = getCliPath();
     if (!QFile::exists(cliPath)) {
-        std::cerr << "ETRunService::stop: 找不到 easytier-cli.exe: " << cliPath.toStdString() << std::endl;
+        std::cerr << "ETRunService::stop: 找不到 easytier-cli: " << cliPath.toStdString() << std::endl;
         return false;
     }
     
     QString workDir = getWorkingDirectory();
     
-    // 合并停止+卸载为一条 cmd /c 命令，只需一次 UAC 授权
-    // 使用 & 串联：无论停止是否成功，都尝试卸载（与原逻辑一致）
+#ifdef Q_OS_WIN32
+    // Windows: 使用 cmd /c 串联停止和卸载命令
     QString stopCmd = QString("\"%1\" service stop").arg(cliPath);
     QString uninstallCmd = QString("\"%1\" service uninstall").arg(cliPath);
     
@@ -233,10 +320,40 @@ bool ETRunService::stop()
     
     std::clog << "ETRunService: 停止并卸载服务成功" << std::endl;
     return true;
+#else
+    // Linux: 构造复合命令，用 ; 连接停止和卸载（无论停止是否成功都尝试卸载）
+    QStringList stopArgs;
+    stopArgs << "service" << "-n" << SERVICE_NAME << "stop";
+    
+    QStringList uninstallArgs;
+    uninstallArgs << "service" << "-n" << SERVICE_NAME << "uninstall";
+    
+    // 构造复合命令: stop ; uninstall
+    QString combinedCmd = QString("\"%1\" %2 ; \"%1\" %3")
+                             .arg(cliPath)
+                             .arg(stopArgs.join(" "))
+                             .arg(uninstallArgs.join(" "));
+    
+    std::clog << "ETRunService: 停止并卸载服务 (需要pkexec授权)" << std::endl;
+    std::clog << "复合命令: " << combinedCmd.toStdString() << std::endl;
+    
+    // 使用 bash -c 执行复合命令
+    QStringList bashArgs;
+    bashArgs << "-c" << combinedCmd;
+    
+    if (!executeElevated("bash", bashArgs, workDir)) {
+        std::cerr << "ETRunService: 停止并卸载服务失败" << std::endl;
+        return false;
+    }
+    
+    std::clog << "ETRunService: 停止并卸载服务成功" << std::endl;
+    return true;
+#endif
 }
 
 bool ETRunService::isRunning()
 {
+#ifdef Q_OS_WIN32
     // 创建系统进程快照，TH32CS_SNAPPROCESS 表示包含所有进程信息
     // 参数 dwProcessID=0 表示当前进程，对 TH32CS_SNAPPROCESS 无实际影响
     const HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -266,4 +383,27 @@ bool ETRunService::isRunning()
     // 关闭快照句柄，释放系统资源
     CloseHandle(snapshot);
     return found;
+#else
+    // Linux: 使用 easytier-cli service status 检查服务状态
+    QString cliPath = getCliPath();
+    QStringList args;
+    args << "service" << "-n" << SERVICE_NAME << "status";
+
+    CommandResult result = executeCommand(cliPath, args, 10000);
+
+    if (result.success) {
+        if (result.outputContains("running")) {
+            return true;
+        }
+        if (result.outputContains("stopped")) {
+            return false;
+        }
+    }
+
+    // 备用方案：检查 easytier-deamon 进程是否存在
+    QProcess process;
+    process.start("pgrep", QStringList() << "-x" << "easytier-deamon");
+    process.waitForFinished(5000);
+    return process.exitCode() == 0;
+#endif
 }

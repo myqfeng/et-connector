@@ -98,31 +98,32 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
 )
 
-# Windows特定：复制etcore文件夹到输出目录和安装目录
+# 复制etcore文件夹到输出目录和安装目录
 if(WIN32)
-    # 定义etcore源目录
-    set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore")
-    
-    # 添加自定义命令：在构建时复制etcore文件夹到输出目录
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${ETCORE_SOURCE_DIR}
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/etcore
-        COMMENT "复制etcore文件夹到输出目录"
-    )
-    
-    # 安装etcore目录
-    install(CODE "
-        message(STATUS \"部署etcore...\")
-        # 获取安装目录的绝对路径
-        get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
-        execute_process(
-            COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
-                \"${ETCORE_SOURCE_DIR}\"
-                \"\${INSTALL_ABS_PATH}/bin/etcore\"
-        )
-    ")
+    set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/windows")
+else()
+    set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/linux")
 endif()
+
+# 添加自定义命令：在构建时复制etcore文件夹到输出目录
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${ETCORE_SOURCE_DIR}
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/etcore
+    COMMENT "复制etcore文件夹到输出目录"
+)
+
+# 安装etcore目录
+install(CODE "
+    message(STATUS \"部署etcore...\")
+    # 获取安装目录的绝对路径
+    get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+    execute_process(
+        COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
+            \"${ETCORE_SOURCE_DIR}\"
+            \"\${INSTALL_ABS_PATH}/bin/etcore\"
+    )
+")
 
 # 安装时使用windeployqt部署Qt运行时
 if(WIN32)

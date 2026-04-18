@@ -2,7 +2,7 @@
  * @file ETRunService.h
  * @brief EasyTier Core 系统服务管理器
  * 
- * 通过 easytier-cli.exe 管理 EasyTier Core 系统服务。
+ * 通过 easytier-cli 管理 EasyTier Core 系统服务。
  * 服务安装后默认开机自启。
  * 
  * 设计说明：
@@ -77,7 +77,7 @@ public:
     static bool isServiceInstalled();
     
     /**
-     * @brief 获取 easytier-cli.exe 路径
+     * @brief 获取 easytier-cli 路径
      * @return CLI 工具完整路径
      */
     static QString getCliPath();
