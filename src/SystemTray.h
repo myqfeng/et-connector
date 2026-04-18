@@ -64,6 +64,7 @@ private slots:
     void onQuit();
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     
+    void onClearConnectionInfo();
     void onConnectionKeyChanged();
     void onHeartbeat();
 
@@ -71,6 +72,7 @@ private:
     void setupMenu();
     void updateStatus(ConnectionState state);
     void updateConnectionActions() const;
+    void updateUserStatus();
     void loadSettings();
     void saveSettings();
     
@@ -95,6 +97,7 @@ private:
     
     // 菜单项
     QAction *m_titleAction = nullptr;
+    QAction *m_userStatusAction = nullptr;
     QAction *m_statusAction = nullptr;
     QAction *m_separator1 = nullptr;
     QAction *m_toggleConnectionAction = nullptr;
@@ -102,6 +105,7 @@ private:
     QAction *m_openWebConsoleAction = nullptr;
     QAction *m_loginEasyTierProAction = nullptr;
     QAction *m_settingsAction = nullptr;
+    QAction *m_clearConnectionAction = nullptr;
     QAction *m_separator3 = nullptr;
     QAction *m_autoStartAction = nullptr;
     QAction *m_separator4 = nullptr;

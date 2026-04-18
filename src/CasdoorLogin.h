@@ -64,8 +64,10 @@ signals:
      * @brief 登录成功信号
      * @param deviceKey 设备接入密钥（etk 开头）
      * @param displayName 密钥显示名称
+     * @param userId 用户ID
+     * @param userDisplayName 用户显示名称
      */
-    void loginSuccess(const QString &deviceKey, const QString &displayName);
+    void loginSuccess(const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName);
     
     /**
      * @brief 登录失败信号
@@ -156,6 +158,8 @@ private:
     QString m_codeVerifier;                   ///< PKCE code verifier
     QString m_state;                          ///< OAuth state 参数
     QString m_accessToken;                    ///< 访问令牌
+    QString m_userId;                         ///< 用户ID
+    QString m_userDisplayName;                ///< 用户显示名称
 
     static constexpr int TIME_OUT = 60000;     ///< 登录超时时间（60秒）
     static constexpr int CALLBACK_PORT = 54321; ///< 回调服务器端口

@@ -109,13 +109,6 @@ void SettingsDialog::setConnectionKey(const QString &key)
 
 void SettingsDialog::accept()
 {
-    QString key = getConnectionKey();
-    if (key.isEmpty()) {
-        m_keyEdit->setFocus();
-        m_keyEdit->setPlaceholderText("输入不能为空！");
-        return;
-    }
-    
     emit connectionKeyChanged();
     QDialog::accept();
 }

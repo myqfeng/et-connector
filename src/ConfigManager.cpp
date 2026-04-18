@@ -40,11 +40,10 @@ void ConfigManager::initializeConfigPath()
     for (const QString &basePath : candidatePaths) {
         if (basePath.isEmpty()) continue;
         
-        QString configDir = basePath + "/EasyTier";
-        QDir dir(configDir);
-        
+        QString configDir = basePath;
+
         // 检查目录是否可写
-        if (dir.exists() || dir.mkpath(".")) {
+        if (QDir dir(configDir); dir.exists() || dir.mkpath(".")) {
             QFile testFile(configDir + "/.test");
             if (testFile.open(QIODevice::WriteOnly)) {
                 testFile.close();
@@ -111,6 +110,9 @@ bool ConfigManager::saveConfig()
     QJsonObject configObj;
     configObj["connectionKey"] = m_connectionKey;
     configObj["autoStart"] = m_autoStart;
+    configObj["userId"] = m_userId;
+    configObj["userDisplayName"] = m_userDisplayName;
+    configObj["oauthDeviceKey"] = m_oauthDeviceKey;
     
     QJsonDocument doc(configObj);
     QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
@@ -163,6 +165,9 @@ bool ConfigManager::loadConfig()
     // 安全读取配置项
     m_connectionKey = configObj["connectionKey"].toString("");
     m_autoStart = configObj["autoStart"].toBool(false);
+    m_userId = configObj["userId"].toString("");
+    m_userDisplayName = configObj["userDisplayName"].toString("");
+    m_oauthDeviceKey = configObj["oauthDeviceKey"].toString("");
     
     std::clog << "ConfigManager: 配置已加载" << std::endl;
     return true;
@@ -172,5 +177,8 @@ void ConfigManager::resetToDefaults()
 {
     m_connectionKey.clear();
     m_autoStart = false;
+    m_userId.clear();
+    m_userDisplayName.clear();
+    m_oauthDeviceKey.clear();
     std::clog << "ConfigManager: 配置已重置为默认值" << std::endl;
 }

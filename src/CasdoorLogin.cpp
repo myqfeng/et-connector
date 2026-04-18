@@ -227,7 +227,6 @@ QString CasdoorLogin::makeRandomString(int length) const
     for (int i = 0; i < length; ++i) {
         randomBytes[i] = static_cast<char>(QRandomGenerator::global()->bounded(256));
     }
-    
     // 转换为 Base64 URL 安全编码（去除填充字符）
     return QString::fromLatin1(randomBytes.toBase64(
         QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals
@@ -235,81 +234,44 @@ QString CasdoorLogin::makeRandomString(int length) const
 }
 
 QString CasdoorLogin::makeCodeChallenge(const QString &verifier) const
-
 {
-
     // SHA256 哈希
-
     QByteArray hash = QCryptographicHash::hash(
-
-        verifier.toUtf8(), 
-
+        verifier.toUtf8(),
         QCryptographicHash::Sha256
-
     );
 
-    
-
     // 转换为 Base64 URL 安全编码（去除填充字符）
-
     return QString::fromLatin1(hash.toBase64(
-
         QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals
-
     ));
-
 }
 
-
-
 void CasdoorLogin::stopLogin()
-
 {
-
     // 停止超时定时器
-
     if (m_timeoutTimer->isActive()) {
-
         m_timeoutTimer->stop();
-
     }
-
-    
 
     // 关闭服务器
-
     if (m_server->isListening()) {
-
         m_server->close();
-
     }
-
-    
-
     // 断开所有信号连接
-
     m_server->disconnect();
-
     m_networkManager->disconnect();
-
 }
 
 
 
 void CasdoorLogin::onLoginTimeout()
-
 {
-
     // 超时，停止登录流程
-
     stopLogin();
 
-    
-
     // 发出登录失败信号
-
     emit loginFailed("登录超时，请在60秒内完成登录");
-
 }
 
 void CasdoorLogin::fetchTenants(const QString &accessToken)
@@ -341,6 +303,12 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         }
         
         QJsonObject obj = json.object();
+        
+        // 提取用户信息
+        QJsonObject userObj = obj["user"].toObject();
+        m_userId = userObj["id"].toString();
+        m_userDisplayName = userObj["display_name"].toString();
+        
         QJsonArray tenantsArray = obj["tenants"].toArray();
         
         QList<TenantInfo> tenants;
@@ -469,7 +437,7 @@ void CasdoorLogin::fetchDeviceKeySecret(const QString &accessToken, const QStrin
         }
         
         // 登录成功，发送设备接入密钥
-        emit loginSuccess(deviceKey, displayName);
+        emit loginSuccess(deviceKey, displayName, m_userId, m_userDisplayName);
     });
 }
 

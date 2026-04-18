@@ -35,10 +35,16 @@ public:
     QString getConnectionKey() const { return m_connectionKey; }
     bool getAutoStart() const { return m_autoStart; }
     QString getConfigFilePath() const { return m_configFilePath; }
+    QString getUserId() const { return m_userId; }
+    QString getUserDisplayName() const { return m_userDisplayName; }
+    QString getOAuthDeviceKey() const { return m_oauthDeviceKey; }
     
     // 设置配置
     void setConnectionKey(const QString &key) { m_connectionKey = key; }
     void setAutoStart(bool autoStart) { m_autoStart = autoStart; }
+    void setUserId(const QString &id) { m_userId = id; }
+    void setUserDisplayName(const QString &name) { m_userDisplayName = name; }
+    void setOAuthDeviceKey(const QString &key) { m_oauthDeviceKey = key; }
     
     /**
      * @brief 保存配置到文件
@@ -59,12 +65,15 @@ public:
 
 private:
     // 配置数据
-    QString m_connectionKey;    ///< 连接密钥
-    bool m_autoStart = false;   ///< 是否开机启动托盘程序
+    QString m_connectionKey;      ///< 连接密钥
+    bool m_autoStart = false;     ///< 是否开机启动托盘程序
+    QString m_userId;             ///< OAuth用户ID
+    QString m_userDisplayName;    ///< OAuth用户显示名称
+    QString m_oauthDeviceKey;     ///< OAuth登录获取的设备密钥（不含前缀）
     
     // 配置文件路径
-    QString m_configFilePath;   ///< 配置文件完整路径
-    QString m_configDirPath;    ///< 配置目录路径
+    QString m_configFilePath;     ///< 配置文件完整路径
+    QString m_configDirPath;      ///< 配置目录路径
     
     /**
      * @brief 初始化配置路径

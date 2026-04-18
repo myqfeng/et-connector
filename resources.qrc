@@ -14,5 +14,9 @@
         <file>assets/settings.svg</file>
         <file>assets/about.svg</file>
         <file>assets/quit.svg</file>
+        <file>assets/user.svg</file>
+        <file>assets/user-loggedin.svg</file>
+        <file>assets/user-opensource.svg</file>
+        <file>assets/clear.svg</file>
     </qresource>
 </RCC>

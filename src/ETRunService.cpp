@@ -168,10 +168,11 @@ bool ETRunService::start(const QString &connectionKey)
     // 如果服务未安装，合并安装+启动为一条 cmd /c 命令，只需一次 UAC 授权
     if (!isServiceInstalled()) {
         const QString hostname = QSysInfo::machineHostName();
+        const QString workPath = getWorkingDirectory()+ "/easytier-deamon.exe";
         
         // 构造安装命令
-        QString installCmd = QString("\"%1\" service install --display-name \"%2\" -- -w \"%3\" --hostname \"%4\" --secure-mode true --rpc-portal 15888")
-                                 .arg(cliPath, SERVICE_NAME, connectionKey, hostname);
+        QString installCmd = QString("\"%1\" service install --core-path \"%2\" --display-name \"%3\" -- -w \"%4\" --hostname \"%5\" --secure-mode true")
+                                 .arg(cliPath, workPath, SERVICE_NAME, connectionKey, hostname);
         // 构造启动命令
         QString startCmd = QString("\"%1\" service start").arg(cliPath);
         
@@ -254,7 +255,7 @@ bool ETRunService::isRunning()
     if (Process32FirstW(snapshot, &entry)) {
         do {
             // _wcsicmp 宽字符不区分大小写比较，匹配进程名
-            if (_wcsicmp(entry.szExeFile, L"easytier-core.exe") == 0) {
+            if (_wcsicmp(entry.szExeFile, L"easytier-deamon.exe") == 0) {
                 found = true;
                 break;
             }
