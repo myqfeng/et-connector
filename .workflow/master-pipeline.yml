@@ -19,9 +19,9 @@ stages:
         gccVersion: '15.2'
         commands:
           - '# 安装依赖'
-          - sudo apt install gcc g++ gdb cmake
-          - sudo apt install libc6 libstdc++6 libqt6core6 libqt6gui6 libqt6widgets libqt6svg6 qt6-qpa-plugins qt6-image-formats-plugins
-          - sudo apt install qt6-base-dev libqt6svg6-dev
+          - apt install gcc g++ gdb cmake
+          - apt install libc6 libstdc++6 libqt6core6 libqt6gui6 libqt6widgets libqt6svg6 qt6-qpa-plugins qt6-image-formats-plugins
+          - apt install qt6-base-dev libqt6svg6-dev
           - ''
           - '# 新建build目录，切换到build目录'
           - 'mkdir build && cd build '
