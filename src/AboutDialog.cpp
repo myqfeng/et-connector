@@ -11,6 +11,8 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QDate>
+#include <QDesktopServices>
+#include <QUrl>
 #include <QApplication>
 
 AboutDialog::AboutDialog(QWidget *parent)
@@ -76,6 +78,12 @@ void AboutDialog::setupUI()
     // 按钮
     auto *buttonLayout = new QHBoxLayout();
     buttonLayout->addStretch();
+    
+    auto *sponsorButton = new QPushButton("赞助作者", this);
+    connect(sponsorButton, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://qtet.myqfeng.top/other/donate/"));
+    });
+    buttonLayout->addWidget(sponsorButton);
     
     auto *okButton = new QPushButton("确定", this);
     okButton->setDefault(true);
