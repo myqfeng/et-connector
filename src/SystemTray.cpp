@@ -573,8 +573,80 @@ void SystemTray::onAbout()
 
 void SystemTray::onQuit()
 {
-    saveSettings();
-    QApplication::quit();
+    // 如果服务未运行，直接退出
+    if (!ETRunService::isRunning()) {
+        saveSettings();
+        QApplication::quit();
+        return;
+    }
+
+    // 服务正在运行，检查是否有记住的选择
+    bool rememberQuitChoice = m_configManager->getRememberQuitChoice();
+    bool stopOnQuit = m_configManager->getStopOnQuit();
+
+    if (rememberQuitChoice) {
+        // 已记住选择，按记忆执行
+        if (stopOnQuit) {
+            // 记住的选择是"停止并退出"
+            showProgressDialog("正在停止 EasyTier 服务...");
+            bool stopped = ETRunService::stop();
+            closeProgressDialog();
+
+            if (stopped) {
+                saveSettings();
+                QApplication::quit();
+            } else {
+                m_trayIcon->showMessage("错误", "EasyTier 服务停止失败，程序保持运行",
+                                        QSystemTrayIcon::Warning, 5000);
+            }
+        } else {
+            // 记住的选择是"仅退出前端"
+            saveSettings();
+            QApplication::quit();
+        }
+        return;
+    }
+
+    // 未记住选择，弹出确认对话框
+    if (m_quitConfirmDialog.isNull()) {
+        m_quitConfirmDialog = new QuitConfirmDialog();
+    }
+
+    if (m_quitConfirmDialog->exec() == QDialog::Accepted) {
+        bool choseStopAndQuit = m_quitConfirmDialog->choseStopAndQuit();
+        bool rememberChoice = m_quitConfirmDialog->isRememberChoice();
+
+        // 如果用户勾选了"记住我的选择"，保存到配置
+        if (rememberChoice) {
+            m_configManager->setRememberQuitChoice(true);
+            m_configManager->setStopOnQuit(choseStopAndQuit);
+            m_configManager->saveConfig();
+        }
+
+        if (choseStopAndQuit) {
+            // 用户选择"是"：停止服务后退出
+            showProgressDialog("正在停止 EasyTier 服务...");
+            bool stopped = ETRunService::stop();
+            closeProgressDialog();
+
+            if (stopped) {
+                saveSettings();
+                QApplication::quit();
+            } else {
+                m_trayIcon->showMessage("错误", "EasyTier 服务停止失败，程序保持运行",
+                                        QSystemTrayIcon::Warning, 5000);
+            }
+        } else {
+            // 用户选择"否"：仅退出前端
+            saveSettings();
+            QApplication::quit();
+        }
+    }
+
+    // 清理对话框
+    if (!m_quitConfirmDialog.isNull()) {
+        m_quitConfirmDialog->deleteLater();
+    }
 }
 
 void SystemTray::onTrayActivated(QSystemTrayIcon::ActivationReason reason)

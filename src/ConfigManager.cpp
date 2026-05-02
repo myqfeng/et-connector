@@ -113,6 +113,8 @@ bool ConfigManager::saveConfig()
     configObj["userId"] = m_userId;
     configObj["userDisplayName"] = m_userDisplayName;
     configObj["oauthDeviceKey"] = m_oauthDeviceKey;
+    configObj["rememberQuitChoice"] = m_rememberQuitChoice;
+    configObj["stopOnQuit"] = m_stopOnQuit;
     
     QJsonDocument doc(configObj);
     QByteArray jsonData = doc.toJson(QJsonDocument::Indented);
@@ -168,6 +170,8 @@ bool ConfigManager::loadConfig()
     m_userId = configObj["userId"].toString("");
     m_userDisplayName = configObj["userDisplayName"].toString("");
     m_oauthDeviceKey = configObj["oauthDeviceKey"].toString("");
+    m_rememberQuitChoice = configObj["rememberQuitChoice"].toBool(false);
+    m_stopOnQuit = configObj["stopOnQuit"].toBool(true);
     
     std::clog << "ConfigManager: 配置已加载" << std::endl;
     return true;
@@ -180,5 +184,7 @@ void ConfigManager::resetToDefaults()
     m_userId.clear();
     m_userDisplayName.clear();
     m_oauthDeviceKey.clear();
+    m_rememberQuitChoice = false;
+    m_stopOnQuit = true;
     std::clog << "ConfigManager: 配置已重置为默认值" << std::endl;
 }

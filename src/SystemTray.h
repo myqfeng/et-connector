@@ -22,6 +22,7 @@
 #include <QSettings>
 #include "SettingsDialog.h"
 #include "AboutDialog.h"
+#include "QuitConfirmDialog.h"
 #include "ETRunService.h"
 #include "ConfigManager.h"
 #include "CasdoorLogin.h"
@@ -113,6 +114,7 @@ private:
     // 对话框（使用 QPointer 自动管理，避免悬空指针）
     QPointer<SettingsDialog> m_settingsDialog;
     QPointer<AboutDialog> m_aboutDialog;
+    QPointer<QuitConfirmDialog> m_quitConfirmDialog;
     
     // 状态变量
     ConnectionState m_connectionState = ConnectionState::NotStarted;

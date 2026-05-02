@@ -25,6 +25,7 @@ set(SOURCES
     src/SystemTray.cpp
     src/SettingsDialog.cpp
     src/AboutDialog.cpp
+    src/QuitConfirmDialog.cpp
     src/ETRunService.cpp
     src/ConfigManager.cpp
     src/CasdoorLogin.cpp
@@ -35,6 +36,7 @@ set(HEADERS
     src/SystemTray.h
     src/SettingsDialog.h
     src/AboutDialog.h
+    src/QuitConfirmDialog.h
     src/ETRunService.h
     src/ConfigManager.h
     src/CasdoorLogin.h
