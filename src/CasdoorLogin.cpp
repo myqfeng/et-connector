@@ -20,9 +20,6 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-// 静态成员初始化
-const QString CasdoorLogin::CALLBACK_URL = "http://127.0.0.1:54321/callback";
-
 CasdoorLogin::CasdoorLogin(const QString &clientId, QObject *parent)
     : QObject(parent), m_clientId(clientId)
 {
@@ -40,11 +37,22 @@ void CasdoorLogin::startLogin()
     // 1. 如果之前有未完成的登录，先清理
     stopLogin();
 
-    // 2. 在本地启动回调服务器
-    if (!m_server->listen(QHostAddress::LocalHost, CALLBACK_PORT)) {
-        emit loginFailed(QString("无法启动本地服务，端口 %1 可能被占用").arg(CALLBACK_PORT));
+    // 2. 在本地启动回调服务器（尝试随机端口，最多10000次）
+    m_callbackPort = 0;
+    for (int attempt = 0; attempt < 10000; ++attempt) {
+        int randomPort = QRandomGenerator::global()->bounded(10000, 65001);
+        if (m_server->listen(QHostAddress::LocalHost, randomPort)) {
+            m_callbackPort = randomPort;
+            break;
+        }
+    }
+    
+    if (m_callbackPort == 0) {
+        emit loginFailed("无法启动本地服务，未找到可用端口");
         return;
     }
+    
+    m_callbackUrl = QString("http://127.0.0.1:%1/callback").arg(m_callbackPort);
 
     // 3. 生成防 CSRF 的随机 state
     m_state = makeRandomString(32);
@@ -53,12 +61,12 @@ void CasdoorLogin::startLogin()
     m_codeVerifier = makeRandomString(64);
     QString codeChallenge = makeCodeChallenge(m_codeVerifier);
 
-    // 4. 构造 OAuth 授权 URL
+    // 5. 构造 OAuth 授权 URL
     // Casdoor 地址: https://auth.console.easytier.net/
     // 应用名: EasyTier
     QString authUrl = "https://auth.console.easytier.net/login/oauth/authorize?"
                       "client_id=" + m_clientId +
-                      "&redirect_uri=" + CALLBACK_URL +
+                      "&redirect_uri=" + m_callbackUrl +
                       "&response_type=code"
                       "&scope=openid profile"
                       "&state=" + m_state +
@@ -97,11 +105,11 @@ void CasdoorLogin::startLogin()
                                    "<title>登录成功</title>"
                                    "<link rel='icon' href='https://console.easytier.net/favicon.svg'>"
                                    "</head>"
-                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5;'>"
-                                   "<div style='background-color: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; min-width: 400px;'>"
+                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #1a1a2e;'>"
+                                   "<div style='background-color: #16213e; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: inline-block; min-width: 400px;'>"
                                    "<img src='https://console.easytier.net/favicon.svg' width='80' height='80' style='margin-bottom: 20px;'>"
                                    "<h2 style='color: #66ccff; margin: 0 0 20px 0;'>登录成功!</h2>"
-                                   "<p style='color: #666; font-size: 16px; margin: 0;'>您可以关闭此标签页并返回应用程序。</p>"
+                                   "<p style='color: #e0e0e0; font-size: 16px; margin: 0;'>程序可能会有数秒的延迟，您可以关闭此标签页。</p>"
                                    "</div>"
                                    "</body>"
                                    "</html>";
@@ -136,11 +144,11 @@ void CasdoorLogin::startLogin()
                                    "<title>登录失败</title>"
                                    "<link rel='icon' href='https://console.easytier.net/favicon.svg'>"
                                    "</head>"
-                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f5f5f5;'>"
-                                   "<div style='background-color: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; min-width: 400px;'>"
+                                   "<body style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #1a1a2e;'>"
+                                   "<div style='background-color: #16213e; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: inline-block; min-width: 400px;'>"
                                    "<img src='https://console.easytier.net/favicon.svg' width='80' height='80' style='margin-bottom: 20px;'>"
-                                   "<h2 style='color: #f44336; margin: 0 0 20px 0;'>登录失败</h2>"
-                                   "<p style='color: #666; font-size: 16px; margin: 0;'>" + errorMsg + "</p>"
+                                   "<h2 style='color: #ff6b6b; margin: 0 0 20px 0;'>登录失败</h2>"
+                                   "<p style='color: #e0e0e0; font-size: 16px; margin: 0;'>" + errorMsg + "</p>"
                                    "</div>"
                                    "</body>"
                                    "</html>";
@@ -167,7 +175,7 @@ void CasdoorLogin::swapCodeForToken(const QString &code)
     params.addQueryItem("grant_type", "authorization_code");
     params.addQueryItem("client_id", m_clientId);
     params.addQueryItem("code", code);
-    params.addQueryItem("redirect_uri", CALLBACK_URL);
+    params.addQueryItem("redirect_uri", m_callbackUrl);
     params.addQueryItem("code_verifier", m_codeVerifier);
 
     // 发送 POST 请求
@@ -325,6 +333,12 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
             return;
         }
         
+        if (tenants.size() == 1) {
+            // 只有一个组织，自动选择
+            fetchDeviceEnrollmentKeys(m_accessToken, tenants[0].id);
+            return;
+        }
+        
         // 显示组织选择对话框
         int selectedIndex = showTenantSelectionDialog(tenants);
         if (selectedIndex >= 0 && selectedIndex < tenants.size()) {
@@ -385,6 +399,12 @@ void CasdoorLogin::fetchDeviceEnrollmentKeys(const QString &accessToken, const Q
         
         if (keys.isEmpty()) {
             emit loginFailed("未找到任何可用的设备接入密钥，请先在控制台创建密钥");
+            return;
+        }
+
+        if (keys.size() == 1) {
+            // 只有一个密钥，自动选择
+            fetchDeviceKeySecret(m_accessToken, tenantId, keys[0].id, keys[0].displayName);
             return;
         }
         

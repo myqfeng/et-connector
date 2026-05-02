@@ -160,10 +160,10 @@ private:
     QString m_accessToken;                    ///< 访问令牌
     QString m_userId;                         ///< 用户ID
     QString m_userDisplayName;                ///< 用户显示名称
+    int m_callbackPort = 0;                   ///< 实际使用的回调端口
+    QString m_callbackUrl;                    ///< 动态生成的回调地址
 
     static constexpr int TIME_OUT = 60000;     ///< 登录超时时间（60秒）
-    static constexpr int CALLBACK_PORT = 54321; ///< 回调服务器端口
-    static const QString CALLBACK_URL;         ///< 回调 URL
 };
 
 #endif // CASDOOR_LOGIN_H
