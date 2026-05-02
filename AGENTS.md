@@ -31,8 +31,7 @@
 
 ## 代码库说明
 
-- **宏 `IS_NOT_ET_PRO`**: 定义后，UI 文本会变化且 Web 控制台菜单会被禁用。  
-  定义于（注释状态）`SystemTray.h:29`。在 "EasyTier" 与 "EasyTier Pro" 字符串之间切换。
+- **已移除 `IS_NOT_ET_PRO`**: 统一采用 "EasyTier Pro" 系列表述。
 - **服务管理** 由静态类 `ETRunService` 处理；所有操作都需要 UAC 提权（`ShellExecuteExW` 配合 `"runas"`）。  
   命令通过 `easytier‑cli.exe`（位于 `etcore/` 目录）执行。
 - **连接状态**: `NotStarted`、`Connecting`、`Connected`（枚举定义于 `SystemTray.h`）。

@@ -64,7 +64,7 @@ void AboutDialog::setupUI()
 
     // 版权
     auto *copyrightLabel = new QLabel(
-        QString("Copyright © %1 明月清风. All rights reserved.").arg(QDate::currentDate().year()),
+        QString("Copyright © %1 Myqfeng. All rights reserved.").arg(QDate::currentDate().year()),
         this
     );
     QFont copyrightFont = copyrightLabel->font();

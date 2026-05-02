@@ -183,21 +183,13 @@ void SystemTray::setupMenu()
     m_menu->addAction(m_loginEasyTierProAction);
     
     // 设置
-#ifdef IS_NOT_ET_PRO
-    const QString settingsText = "设置连接地址与用户名";
-#else
     const QString settingsText = "设置连接地址与密钥";
-#endif
     m_settingsAction = new QAction(QIcon(":/assets/settings.svg"), settingsText, this);
     connect(m_settingsAction, &QAction::triggered, this, &SystemTray::onSettings);
     m_menu->addAction(m_settingsAction);
 
     // 清空连接信息
-#ifdef IS_NOT_ET_PRO
     const QString clearText = "清空连接信息";
-#else
-    const QString clearText = "清空连接信息";
-#endif
     m_clearConnectionAction = new QAction(QIcon(":/assets/clear.svg"), clearText, this);
     connect(m_clearConnectionAction, &QAction::triggered, this, &SystemTray::onClearConnectionInfo);
     m_menu->addAction(m_clearConnectionAction);
@@ -247,6 +239,7 @@ void SystemTray::updateUserStatus()
             if (!userDisplayName.isEmpty()) {
                 m_userStatusAction->setText(QString("用户：%1").arg(userDisplayName));
                 m_userStatusAction->setIcon(QIcon(":/assets/user-loggedin.svg"));
+                m_loginEasyTierProAction->setText("重新登录");
                 std::clog << "updateUserStatus: 显示已登录用户" << std::endl;
                 return;
             }
@@ -255,16 +248,19 @@ void SystemTray::updateUserStatus()
         // 不一致或未保存，显示未登录
         m_userStatusAction->setText("用户：未登录");
         m_userStatusAction->setIcon(QIcon(":/assets/user.svg"));
+        m_loginEasyTierProAction->setText("登录 EasyTier Pro");
         std::clog << "updateUserStatus: 显示未登录" << std::endl;
     } else if (!m_connectionKey.isEmpty()) {
-        // 使用开源控制台
-        m_userStatusAction->setText("开源控制台");
+        // 使用自定义连接信息
+        m_userStatusAction->setText("自定义连接");
         m_userStatusAction->setIcon(QIcon(":/assets/user-opensource.svg"));
-        std::clog << "updateUserStatus: 显示开源控制台" << std::endl;
+        m_loginEasyTierProAction->setText("登录 EasyTier Pro");
+        std::clog << "updateUserStatus: 显示自定义连接" << std::endl;
     } else {
         // 未设置连接地址
         m_userStatusAction->setText("用户：未登录");
         m_userStatusAction->setIcon(QIcon(":/assets/user.svg"));
+        m_loginEasyTierProAction->setText("登录 EasyTier Pro");
         std::clog << "updateUserStatus: 显示未登录(空密钥)" << std::endl;
     }
 }
@@ -389,11 +385,7 @@ void SystemTray::onToggleConnection()
 
 void SystemTray::onOpenWebConsole()
 {
-#ifndef IS_NOT_ET_PRO
     QDesktopServices::openUrl(QUrl("https://console.easytier.net/"));
-#else
-    QMessageBox::information(nullptr, "提示", "暂不支持");
-#endif
 }
 
 void SystemTray::onLoginEasyTierPro()

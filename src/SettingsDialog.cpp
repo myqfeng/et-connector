@@ -21,11 +21,7 @@ SettingsDialog::SettingsDialog(const QString &connectionKey, QWidget *parent)
 
 void SettingsDialog::setupUI()
 {
-#ifdef IS_NOT_ET_PRO
-    setWindowTitle("设置连接地址与用户名");
-#else
     setWindowTitle("设置连接地址与密钥");
-#endif
 
     setWindowIcon(QIcon(":/assets/favicon.svg"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -34,19 +30,11 @@ void SettingsDialog::setupUI()
     auto *mainLayout = new QVBoxLayout(this);
     
     // 密钥输入组
-#ifdef IS_NOT_ET_PRO
-    auto *keyGroup = new QGroupBox("连接地址与用户名", this);
-#else
     auto *keyGroup = new QGroupBox("连接地址与密钥", this);
-#endif
     auto *keyLayout = new QHBoxLayout(keyGroup);
     keyGroup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-#ifdef IS_NOT_ET_PRO
-    auto *keyLabel = new QLabel("地址与用户名:", this);
-#else
     auto *keyLabel = new QLabel("地址与密钥:", this);
-#endif
     m_keyEdit = new QLineEdit(this);
     m_keyEdit->setMinimumHeight(28);
     updatePlaceholderText();
@@ -57,11 +45,7 @@ void SettingsDialog::setupUI()
     mainLayout->addWidget(keyGroup);
 
     // 提示文本
-#ifdef IS_NOT_ET_PRO
-    auto *hintLabel = new QLabel("请输入 Web 控制台连接地址与用户名", this);
-#else
-    auto *hintLabel = new QLabel("请前往 EasyTier Pro 控制台获取连接地址与密钥", this);
-#endif
+    auto *hintLabel = new QLabel("请前往 EasyTier Pro 控制台获取连接地址与密钥\n说明：如果使用开源控制台，您需要输入连接地址与用户名", this);
     hintLabel->setStyleSheet("color: #66ccff;");
     hintLabel->setMaximumHeight(30);
     hintLabel->setWordWrap(true);
@@ -87,11 +71,7 @@ void SettingsDialog::setupUI()
 void SettingsDialog::updatePlaceholderText()
 {
     if (m_keyEdit) {
-#ifdef IS_NOT_ET_PRO
-        m_keyEdit->setPlaceholderText("请输入连接地址与用户名");
-#else
         m_keyEdit->setPlaceholderText("例: tcp://et.example.cn:666/etk_xxxxx");
-#endif
     }
 }
 

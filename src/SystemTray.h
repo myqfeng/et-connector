@@ -26,8 +26,6 @@
 #include "ConfigManager.h"
 #include "CasdoorLogin.h"
 
-//#define IS_NOT_ET_PRO
-
 /**
  * @brief 连接状态枚举
  */
