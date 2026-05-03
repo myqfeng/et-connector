@@ -4,19 +4,28 @@
 
 基于 Qt6 的 Windows 系统托盘应用程序，用于管理 EasyTier 远程控制台连接。应用程序常驻系统托盘，通过 `easytier-cli.exe` 将 EasyTier Core 注册为 Windows 系统服务进行管理，提供连接管理、开机自启等功能。
 
+## 安装说明
+平台支持：Windows（Win 10 1809以上）、Linux（Ubuntu24.04+，Debian12+，Arch/Manjaro）
+
+### Windows
+Windows 用户请直接前往 Releases 页面下载exe安装包，双击运行即可安装
+
+### Linux
+对于 Ubuntu/Debian 用户，请前往 Releases 页面下载 Deb 包，使用如下命令安装
+```bash
+sudo dpkg -i /path/to/your/packge.deb
+
+# 若提示依赖缺失请执行以下命令后再次安装
+sudo apt install -f
+```
+
+对于 Arch/Manjaro 用户，您可以从 AUR 进行安装，以`yay`管理器为例
+```bash
+sudo pacman -Syu yay       # 安装yay
+yay -S easytier-connector  # 安装EasyTier Connector
+```
+
 ## 功能特性
-
-### 系统托盘菜单
-
-| 功能 | 说明 |
-|------|------|
-| 状态显示 | 实时显示：未启动 / 连接中 / 已连接 |
-| 连接控制 | 一键启动/停止 EasyTier Core |
-| Web 控制台 | 快速打开 https://console.easytier.net/ |
-| 设置 | 配置连接地址密钥 |
-| 开机自启 | Windows 注册表实现（无需管理员权限） |
-| 自动回连 | 程序启动时自动连接 |
-| 关于软件 | 显示版本信息 |
 
 ### 核心特性
 
