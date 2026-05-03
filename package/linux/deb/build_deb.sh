@@ -61,6 +61,8 @@ mkdir -p "$TMP_DIR/opt/etconnector"
 # 复制并替换 control 版本号
 cp "$CONTROL_FILE" "$TMP_DIR/DEBIAN/control"
 sed -i "s/^Version:.*/Version: $VERSION/" "$TMP_DIR/DEBIAN/control"
+# 确保 control 文件以换行符结尾（避免 dpkg-deb 解析 Description 字段出错）
+sed -i -e '$a\' "$TMP_DIR/DEBIAN/control"
 
 # 复制 Install/bin 内容到 opt/etconnector
 cp -r "$INSTALL_BIN"/* "$TMP_DIR/opt/etconnector/"
