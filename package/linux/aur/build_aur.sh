@@ -1,20 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
-# 项目根目录
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # 解析参数
 VERSION=""
+REL="1"
 while [[ $# -gt 0 ]]; do
     case $1 in
         --version)
             VERSION="$2"
             shift 2
             ;;
+        --rel)
+            REL="$2"
+            shift 2
+            ;;
         *)
-            echo "用法: $0 --version x.x.x"
+            echo "用法: $0 --version x.x.x [--rel x]"
             exit 1
             ;;
     esac
@@ -22,12 +25,13 @@ done
 
 if [[ -z "$VERSION" ]]; then
     echo "错误: --version 参数为必填项"
-    echo "用法: $0 --version x.x.x"
+    echo "用法: $0 --version x.x.x [--rel x]"
     exit 1
 fi
 
 echo "=== EasyTier Connector AUR 打包 ==="
 echo "版本号: $VERSION"
+echo "pkgrel: $REL"
 
 # AUR 输出目录
 AUR_DIR="$SCRIPT_DIR"
@@ -35,60 +39,55 @@ AUR_DIR="$SCRIPT_DIR"
 # 清理旧的 PKGBUILD 和 .SRCINFO
 rm -f "$AUR_DIR/PKGBUILD" "$AUR_DIR/.SRCINFO"
 
-# 生成 PKGBUILD
-cat > "$AUR_DIR/PKGBUILD" <<EOF
+# 使用占位符 + sed 替换，避免 heredoc 中 $ 被 shell 提前展开
+cat > "$AUR_DIR/PKGBUILD" <<'EOF'
 # Maintainer: Myqfeng <viagrahuang@outlook.com>
 
 pkgname=easytier-connector
-pkgver=$VERSION
-pkgrel=1
+pkgver=__VERSION__
+pkgrel=__REL__
 pkgdesc="EasyTier Web Connector based on Qt6"
 arch=('x86_64')
 url="https://gitee.com/myqfeng/et-connector"
 license=('LGPL3')
 depends=('qt6-base' 'qt6-svg')
-makedepends=('cmake' 'git')
-source=("\${pkgname}-\${pkgver}.tar.gz::https://gitee.com/viah6341/etc-download/releases/download/\${pkgver}/v\${pkgver}.tar.gz")
+makedepends=('cmake')
+source=("${pkgname}-${pkgver}.tar.gz::https://gitee.com/viah6341/etc-download/releases/download/${pkgver}/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
 build() {
-    cd "\${srcdir}/et-connector"
+    cd "${srcdir}/et-connector_v${pkgver}"
+    rm -rf build Install
     mkdir -p build && cd build
-    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake .. -DCMAKE_BUILD_TYPE=Release \
+             -DCMAKE_INSTALL_PREFIX="${srcdir}/et-connector_v${pkgver}/Install"
     cmake --build .
+    cmake --install .
 }
 
 package() {
-    cd "\${srcdir}/et-connector"
-    
-    # 安装主程序到 /opt/etconnector
-    install -Dm755 "build/EasyTierConnector" "\${pkgdir}/opt/etconnector/EasyTierConnector"
-    
-    # 安装 etcore 预编译二进制
-    install -Dm755 "etcore/linux/easytier-cli" "\${pkgdir}/opt/etconnector/etcore/easytier-cli"
-    install -Dm755 "etcore/linux/easytier-deamon" "\${pkgdir}/opt/etconnector/etcore/easytier-deamon"
-    
-    # 安装图标
-    install -Dm644 "assets/favicon.svg" "\${pkgdir}/opt/etconnector/favicon.svg"
-    install -Dm644 "assets/favicon.png" "\${pkgdir}/opt/etconnector/favicon.png"
-    
-    # 安装桌面文件（Exec 指向 /usr/bin symlink，Icon 指向 /opt 下的图标）
-    install -Dm644 /dev/stdin "\${pkgdir}/usr/share/applications/etconnector.desktop" <<DESKTOP_EOF
-[Desktop Entry]
-Type=Application
-Name=ET Connector
-Comment=EasyTier Web Connector
-Exec=/usr/bin/EasyTierConnector
-Icon=/opt/etconnector/favicon.png
-Terminal=false
-Categories=Utility;Qt;Web;Network;Internet;
-DESKTOP_EOF
-    
-    # 创建 /usr/bin symlink（方便命令行调用）
-    install -dm755 "\${pkgdir}/usr/bin"
-    ln -sf "/opt/etconnector/EasyTierConnector" "\${pkgdir}/usr/bin/EasyTierConnector"
+    cd "${srcdir}/et-connector_v${pkgver}"
+
+    # 从 Install/bin 复制主程序和 etcore 到 /opt/etconnector
+    install -Dm755 "Install/bin/EasyTierConnector" "${pkgdir}/opt/etconnector/EasyTierConnector"
+    install -Dm755 "Install/bin/etcore/easytier-cli" "${pkgdir}/opt/etconnector/etcore/easytier-cli"
+    install -Dm755 "Install/bin/etcore/easytier-deamon" "${pkgdir}/opt/etconnector/etcore/easytier-deamon"
+
+    # 从 deb 目录复制图标
+    install -Dm644 "package/linux/deb/opt/etconnector/favicon.png" "${pkgdir}/opt/etconnector/favicon.png"
+
+    # 从 deb 目录复制桌面文件
+    install -Dm644 "package/linux/deb/usr/share/applications/etconnector.desktop" "${pkgdir}/usr/share/applications/etconnector.desktop"
+
+    # 创建 /usr/bin symlink
+    install -dm755 "${pkgdir}/usr/bin"
+    ln -sf "/opt/etconnector/EasyTierConnector" "${pkgdir}/usr/bin/EasyTierConnector"
 }
 EOF
+
+# 替换占位符
+sed -i "s/__VERSION__/$VERSION/g" "$AUR_DIR/PKGBUILD"
+sed -i "s/__REL__/$REL/g" "$AUR_DIR/PKGBUILD"
 
 # 生成 .SRCINFO
 echo "正在生成 .SRCINFO..."
