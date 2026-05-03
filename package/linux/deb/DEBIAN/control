@@ -1,5 +1,5 @@
 Package: easytier-connector
-Version: 0.3.1
+Version: 0.0.0
 Section: utils
 Priority: optional
 Architecture: amd64

@@ -102,8 +102,6 @@ public:
 private:
     /// Windows 服务内部名称（不含空格）
     static constexpr const char* SERVICE_NAME = "QtETWebConnector";
-    /// 服务显示名称
-    static constexpr const char* SERVICE_DISPLAY_NAME = "QtETWebConnector";
 };
 
 #endif // ETRUNSERVICE_H

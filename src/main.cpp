@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     
     // 设置应用程序元信息
     app.setApplicationName("EasyTier Connector");
-    app.setApplicationVersion("0.3.2(et2.6.3)");
+    app.setApplicationVersion("0.3.3(et2.6.3)");
     app.setQuitOnLastWindowClosed(false);
     
     // 设置全局默认字体大小
