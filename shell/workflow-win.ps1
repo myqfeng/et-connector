@@ -33,13 +33,11 @@ Write-Host ""
 # ==================== 提取版本号 ====================
 Write-Host "[2/6] 提取版本号..."
 
-Push-Location $ProjectDir
-$content = Get-Content "CMakeLists.txt" -Raw
+$content = Get-Content (Join-Path $ProjectDir "CMakeLists.txt") -Raw
 $version = if ($content -match 'project\(EasyTierConnector VERSION ([0-9.]+)\)') { $matches[1] }
 
 if (-not $version) {
     Write-Host "错误: 无法从 CMakeLists.txt 提取版本号。" -ForegroundColor Red
-    Pop-Location
     exit 1
 }
 
@@ -61,19 +59,15 @@ Write-Host ""
 # ==================== CMake 配置 ====================
 Write-Host "[4/6] CMake 配置..."
 
-New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
-Push-Location $BuildDir
-
+$cmakeArgs = @("-S", $ProjectDir, "-B", $BuildDir, "-DCMAKE_BUILD_TYPE=Release", "-G", "MinGW Makefiles")
 if ($qtEnv) {
-    cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$qtEnv" "-DCMAKE_INSTALL_PREFIX=$InstallDir"
+    $cmakeArgs += "-DCMAKE_PREFIX_PATH=$qtEnv"
 }
-else {
-    cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release "-DCMAKE_INSTALL_PREFIX=$InstallDir"
-}
+
+& cmake @cmakeArgs
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "错误: CMake 配置失败。" -ForegroundColor Red
-    Pop-Location
     exit 1
 }
 
@@ -83,14 +77,10 @@ Write-Host ""
 # ==================== 编译 ====================
 Write-Host "[5/6] 编译中..."
 
-$cpuCount = $env:NUMBER_OF_PROCESSORS
-if (-not $cpuCount) { $cpuCount = 4 }
-
-cmake --build . --config Release --parallel $cpuCount
+cmake --build $BuildDir --config Release --parallel
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "错误: 编译失败。" -ForegroundColor Red
-    Pop-Location
     exit 1
 }
 
@@ -100,15 +90,12 @@ Write-Host ""
 # ==================== 安装 ====================
 Write-Host "[6/6] 安装..."
 
-cmake --install . --config Release
+cmake --install $BuildDir --config Release
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "错误: 安装失败。" -ForegroundColor Red
-    Pop-Location
     exit 1
 }
-
-Pop-Location
 
 Write-Host "      安装完成，产物位于 Install/bin/。"
 Write-Host ""
