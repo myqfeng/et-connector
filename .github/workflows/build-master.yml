@@ -40,7 +40,7 @@ jobs:
 
       - name: 下载 Qt 6.11.x
         shell: pwsh
-        run: aqt install-qt windows desktop 6.11.2 win64_mingw -O ${{ runner.temp }}\Qt
+        run: aqt install-qt windows desktop 6.10.3 win64_mingw -O ${{ runner.temp }}\Qt
 
       - name: 下载 MinGW 工具链
         shell: pwsh
