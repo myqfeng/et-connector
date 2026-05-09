@@ -44,7 +44,7 @@ jobs:
 
       - name: 下载 MinGW 工具链
         shell: pwsh
-        run: aqt install-tool windows desktop tools_mingw_1310 -O ${{ runner.temp }}\Qt
+        run: aqt install-tool windows desktop 13.10 tools_mingw -O ${{ runner.temp }}\Qt
 
       - name: 下载 CMake & Ninja
         shell: pwsh
