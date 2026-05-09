@@ -49,7 +49,7 @@ jobs:
 
       - name: Install Inno Setup
         shell: pwsh
-        run: winget install -e --id JRSoftware.InnoSetup -v 6.4.3 --accept-source-agreements --accept-package-agreements
+        run: winget install -e --id JRSoftware.InnoSetup --accept-source-agreements --accept-package-agreements
 
       - name: Configure
         shell: msys2 {0}
