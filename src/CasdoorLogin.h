@@ -66,8 +66,9 @@ signals:
      * @param displayName 密钥显示名称
      * @param userId 用户ID
      * @param userDisplayName 用户显示名称
+     * @param tenantName 组织显示名称
      */
-    void loginSuccess(const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName);
+    void loginSuccess(const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName, const QString &tenantName);
     
     /**
      * @brief 登录失败信号
@@ -100,8 +101,9 @@ private:
      * @brief 创建新的设备接入密钥并获取连接密钥
      * @param accessToken 访问令牌
      * @param tenantId 组织 ID
+     * @param tenantName 组织显示名称
      */
-    void createDeviceEnrollmentKey(const QString &accessToken, const QString &tenantId);
+    void createDeviceEnrollmentKey(const QString &accessToken, const QString &tenantId, const QString &tenantName);
     
 
     

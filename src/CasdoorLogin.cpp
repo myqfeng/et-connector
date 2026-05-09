@@ -336,7 +336,7 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         
         if (tenants.size() == 1) {
             // 只有一个组织，自动选择
-            createDeviceEnrollmentKey(m_accessToken, tenants[0].id);
+            createDeviceEnrollmentKey(m_accessToken, tenants[0].id, tenants[0].name);
             return;
         }
         
@@ -344,7 +344,7 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         int selectedIndex = showTenantSelectionDialog(tenants);
         if (selectedIndex >= 0 && selectedIndex < tenants.size()) {
             // 用户选择了组织，创建新的设备接入密钥
-            createDeviceEnrollmentKey(m_accessToken, tenants[selectedIndex].id);
+            createDeviceEnrollmentKey(m_accessToken, tenants[selectedIndex].id, tenants[selectedIndex].name);
         } else {
             // 用户取消选择
             emit loginFailed("用户取消了选择");
@@ -352,7 +352,7 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
     });
 }
 
-void CasdoorLogin::createDeviceEnrollmentKey(const QString &accessToken, const QString &tenantId)
+void CasdoorLogin::createDeviceEnrollmentKey(const QString &accessToken, const QString &tenantId, const QString &tenantName)
 {
     const QString hostname = QSysInfo::machineHostName();
     
@@ -374,7 +374,7 @@ void CasdoorLogin::createDeviceEnrollmentKey(const QString &accessToken, const Q
     // 断开之前的 finished 连接
     disconnect(m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
     
-    connect(m_networkManager, &QNetworkAccessManager::finished, this, [this, hostname](QNetworkReply *reply) {
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, [this, hostname, tenantName](QNetworkReply *reply) {
         reply->deleteLater();
         
         if (reply->error() != QNetworkReply::NoError) {
@@ -400,7 +400,7 @@ void CasdoorLogin::createDeviceEnrollmentKey(const QString &accessToken, const Q
         }
         
         // 登录成功，发送设备接入密钥
-        emit loginSuccess(bootstrapToken, hostname, m_userId, m_userDisplayName);
+        emit loginSuccess(bootstrapToken, hostname, m_userId, m_userDisplayName, tenantName);
     });
 }
 

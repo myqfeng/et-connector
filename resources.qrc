@@ -18,5 +18,6 @@
         <file>assets/user-loggedin.svg</file>
         <file>assets/user-opensource.svg</file>
         <file>assets/clear.svg</file>
+        <file>assets/tenant.svg</file>
     </qresource>
 </RCC>

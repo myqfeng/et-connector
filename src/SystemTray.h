@@ -97,6 +97,7 @@ private:
     // 菜单项
     QAction *m_titleAction = nullptr;
     QAction *m_userStatusAction = nullptr;
+    QAction *m_tenantStatusAction = nullptr;
     QAction *m_statusAction = nullptr;
     QAction *m_separator1 = nullptr;
     QAction *m_toggleConnectionAction = nullptr;
