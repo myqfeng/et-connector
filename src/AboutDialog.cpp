@@ -24,7 +24,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 void AboutDialog::setupUI()
 {
     setWindowTitle("关于 EasyTier 控制台连接器");
-    setWindowIcon(QIcon(":/assets/favicon.ico"));
+    setWindowIcon(QIcon(":/assets/favicon.svg"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(400, 280);
     

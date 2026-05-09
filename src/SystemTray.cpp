@@ -517,6 +517,46 @@ bool SystemTray::registerAutoStart()
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "注册开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#elif defined(Q_OS_MACOS)
+    // macOS: 使用 ~/Library/LaunchAgents/ 目录下的 plist 文件
+    QString launchAgentsDir = QDir::homePath() + "/Library/LaunchAgents";
+    QDir dir(launchAgentsDir);
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
+    QString plistPath = launchAgentsDir + "/com.easytier.connector.plist";
+    QString plistContent = QString(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+        "<plist version=\"1.0\">\n"
+        "<dict>\n"
+        "    <key>Label</key>\n"
+        "    <string>com.easytier.connector</string>\n"
+        "    <key>ProgramArguments</key>\n"
+        "    <array>\n"
+        "        <string>%1</string>\n"
+        "        <string>--auto-start</string>\n"
+        "    </array>\n"
+        "    <key>RunAtLoad</key>\n"
+        "    <true/>\n"
+        "    <key>KeepAlive</key>\n"
+        "    <false/>\n"
+        "</dict>\n"
+        "</plist>\n"
+    ).arg(appPath);
+
+    QFile plistFile(plistPath);
+    if (!plistFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        std::cerr << "注册开机自启: 失败，无法写入 plist 文件" << std::endl;
+        return false;
+    }
+
+    plistFile.write(plistContent.toUtf8());
+    plistFile.close();
+
+    std::clog << "注册开机自启: 成功" << std::endl;
+    return true;
 #else
     // Linux: 使用 ~/.config/autostart/ 目录下的 .desktop 文件
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
@@ -559,6 +599,11 @@ bool SystemTray::unregisterAutoStart()
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#elif defined(Q_OS_MACOS)
+    QString plistPath = QDir::homePath() + "/Library/LaunchAgents/com.easytier.connector.plist";
+    bool success = QFile::remove(plistPath);
+    std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
+    return success;
 #else
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
     bool success = QFile::remove(desktopFilePath);
@@ -573,6 +618,9 @@ bool SystemTray::isAutoStartRegistered()
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
     return settings.contains("EasyTierConnector");
+#elif defined(Q_OS_MACOS)
+    QString plistPath = QDir::homePath() + "/Library/LaunchAgents/com.easytier.connector.plist";
+    return QFile::exists(plistPath);
 #else
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
     return QFile::exists(desktopFilePath);
