@@ -49,7 +49,12 @@ jobs:
 
       - name: Install Inno Setup
         shell: pwsh
-        run: winget install -e --id JRSoftware.InnoSetup --accept-source-agreements --accept-package-agreements
+        run: |
+          if (-not (Get-Command "iscc" -ErrorAction SilentlyContinue)) {
+            winget install -e --id JRSoftware.InnoSetup --accept-source-agreements --accept-package-agreements
+          } else {
+            Write-Host "Inno Setup 已安装，跳过。"
+          }
 
       - name: Configure
         shell: msys2 {0}
