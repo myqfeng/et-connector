@@ -38,13 +38,13 @@ jobs:
         shell: pwsh
         run: pip install aqtinstall
 
-      - name: 下载 Qt 6.11.x
+      - name: 下载 Qt 6.10.3
         shell: pwsh
         run: aqt install-qt windows desktop 6.10.3 win64_mingw -O ${{ runner.temp }}\Qt
 
       - name: 下载 MinGW 工具链
         shell: pwsh
-        run: aqt install-tool windows desktop 13.10 tools_mingw -O ${{ runner.temp }}\Qt
+        run: aqt install-tool windows desktop tools_mingw1310 -O ${{ runner.temp }}\Qt
 
       - name: 下载 CMake & Ninja
         shell: pwsh
