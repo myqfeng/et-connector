@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "EasyTier Connector"
-#define MyAppVersion "0.3.2"
+#define MyAppVersion "0.3.3"
 #define MyAppPublisher "EasyTier"
 #define MyAppURL "https://easytier.cn"
 #define MyAppExeName "EasyTierConnector.exe"
@@ -44,7 +44,7 @@ InfoBeforeFile={#ProjectDir}\package\windows\introduction.rtf
 ; 强制要求管理员权限（安装和卸载都需要）
 PrivilegesRequired=admin
 OutputDir={#ProjectDir}\Install
-OutputBaseFilename=EasyTierConnector_v{#MyAppVersion}_win_amd64_installer
+OutputBaseFilename=EasyTierConnector_v{#MyAppVersion}_win_amd64
 SetupIconFile={#ProjectDir}\assets\favicon.ico
 SolidCompression=yes
 WizardStyle=modern dynamic windows11
