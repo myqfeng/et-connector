@@ -4,7 +4,7 @@
 
 #define MyAppName "EasyTier Connector"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.3.3"
+  #define MyAppVersion "1.0.0"
 #endif
 #define MyAppPublisher "EasyTier"
 #define MyAppURL "https://easytier.cn"
