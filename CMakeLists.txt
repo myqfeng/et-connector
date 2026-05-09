@@ -5,7 +5,7 @@ if(POLICY CMP0177)
     cmake_policy(SET CMP0177 NEW)
 endif()
 
-project(EasyTierConnector VERSION 1.0.0 LANGUAGES CXX)
+project(EasyTierConnector VERSION 0.9.0 LANGUAGES CXX)
 set(ET_VERSION "2.6.3")
 
 # 设置默认安装目录为项目根目录的Install文件夹
