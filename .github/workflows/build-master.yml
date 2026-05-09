@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 设置非交互式环境
         run: echo "DEBIAN_FRONTEND=noninteractive" | sudo tee -a /etc/environment
@@ -22,7 +22,7 @@ jobs:
           sudo ./shell/workflow-linux-deb.sh
 
       - name: 上传 DEB 包
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: EasyTierConnector-linux-amd64
           path: Install/*.deb
@@ -32,21 +32,36 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: 安装 MinGW 工具链和 Qt
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-qt6
-            mingw-w64-x86_64-qt6-base
-            mingw-w64-x86_64-qt6-svg
-            mingw-w64-x86_64-qt6-tools
+      - name: 安装 aqtinstall
+        shell: pwsh
+        run: pip install aqtinstall
+
+      - name: 下载 Qt 6.11.x
+        shell: pwsh
+        run: aqt install-qt windows desktop 6.11.2 win64_mingw -O ${{ runner.temp }}\Qt
+
+      - name: 下载 MinGW 工具链
+        shell: pwsh
+        run: aqt install-tool windows desktop tools_mingw -O ${{ runner.temp }}\Qt
+
+      - name: 下载 CMake & Ninja
+        shell: pwsh
+        run: |
+          aqt install-tool windows desktop tools_cmake -O ${{ runner.temp }}\Qt
+          aqt install-tool windows desktop tools_ninja -O ${{ runner.temp }}\Qt
+
+      - name: 设置 MinGW + Qt 环境
+        shell: bash
+        run: |
+          QT_VER=$(ls "$RUNNER_TEMP/Qt" | grep -E '^[0-9]+\.[0-9]+' | head -1)
+          MINGW_DIR=$(find "$RUNNER_TEMP/Qt/Tools" -maxdepth 1 -name "mingw*_64" -type d | head -1)
+          echo "QT_DIR=$RUNNER_TEMP/Qt/$QT_VER/mingw_64" >> $GITHUB_ENV
+          echo "$MINGW_DIR/bin" >> $GITHUB_PATH
+          echo "$RUNNER_TEMP/Qt/Tools/CMake_64/bin" >> $GITHUB_PATH
+          echo "$RUNNER_TEMP/Qt/Tools/Ninja" >> $GITHUB_PATH
+          echo "$RUNNER_TEMP/Qt/$QT_VER/mingw_64/bin" >> $GITHUB_PATH
 
       - name: Install Inno Setup
         shell: pwsh
@@ -58,15 +73,15 @@ jobs:
           }
 
       - name: Configure
-        shell: msys2 {0}
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_DIR" -G "Ninja"
 
       - name: Build
-        shell: msys2 {0}
+        shell: bash
         run: cmake --build build --config Release --parallel
 
       - name: Install
-        shell: msys2 {0}
+        shell: bash
         run: cmake --install build --config Release
 
       - name: 提取版本号
@@ -88,7 +103,7 @@ jobs:
           & ".\package\windows\build_win.ps1" --version $env:VERSION
 
       - name: 上传安装包
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: EasyTierConnector-win-amd64
           path: Install/*.exe
