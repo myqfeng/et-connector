@@ -47,13 +47,9 @@ jobs:
             mingw-w64-x86_64-qt6-svg
             mingw-w64-x86_64-qt6-tools
 
-      - name: 安装 Inno Setup 6
+      - name: Install Inno Setup
         shell: pwsh
-        run: |
-          $url = "https://files.jrsoftware.org/is/6/innosetup-6.4.1.exe"
-          Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\innosetup.exe"
-          Start-Process -FilePath "$env:TEMP\innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
-          Write-Host "Inno Setup 安装完成"
+        run: winget install -e --id JRSoftware.InnoSetup -v 6.4.3
 
       - name: Configure
         shell: msys2 {0}
@@ -80,10 +76,10 @@ jobs:
             exit 1
           }
 
-      - name: Inno Setup 打包
+      - name: Build installer
         shell: pwsh
         run: |
-          & "${{ github.workspace }}\package\windows\build_win.ps1" --version $env:VERSION
+          & ".\package\windows\build_win.ps1" --version $env:VERSION
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
