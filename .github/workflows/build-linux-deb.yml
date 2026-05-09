@@ -1,0 +1,28 @@
+name: Build Linux DEB
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置非交互式环境
+        run: echo "DEBIAN_FRONTEND=noninteractive" | sudo tee -a /etc/environment
+
+      - name: 运行一键编译打包脚本
+        run: |
+          chmod +x shell/workflow-linux-deb.sh
+          sudo ./shell/workflow-linux-deb.sh
+
+      - name: 上传 DEB 包
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyTierConnector-linux-amd64
+          path: Install/*.deb

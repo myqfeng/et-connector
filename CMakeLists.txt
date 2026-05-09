@@ -6,6 +6,7 @@ if(POLICY CMP0177)
 endif()
 
 project(EasyTierConnector VERSION 1.0.0 LANGUAGES CXX)
+set(ET_VERSION "2.6.3")
 
 # 设置默认安装目录为项目根目录的Install文件夹
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
@@ -62,6 +63,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Network
     Qt6::Svg
 )
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${PROJECT_VERSION}" ET_VERSION="${ET_VERSION}")
 
 # Windows特定设置
 if(WIN32)
