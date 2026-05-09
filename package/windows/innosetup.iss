@@ -3,14 +3,18 @@
 ; Non-commercial use only
 
 #define MyAppName "EasyTier Connector"
-#define MyAppVersion "0.3.3"
+#ifndef MyAppVersion
+  #define MyAppVersion "0.3.3"
+#endif
 #define MyAppPublisher "EasyTier"
 #define MyAppURL "https://easytier.cn"
 #define MyAppExeName "EasyTierConnector.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
-#define ProjectDir "E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector"
+#ifndef ProjectDir
+  #define ProjectDir "..\.."
+#endif
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -60,8 +64,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\Install\bin\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\YMHuang\Programs_Code\CPP_Qt\et-web-connector\Install\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#ProjectDir}\Install\bin\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ProjectDir}\Install\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

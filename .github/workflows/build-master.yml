@@ -1,0 +1,89 @@
+name: Build Master
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置非交互式环境
+        run: echo "DEBIAN_FRONTEND=noninteractive" | sudo tee -a /etc/environment
+
+      - name: 运行一键编译打包脚本
+        run: |
+          chmod +x shell/workflow-linux-deb.sh
+          sudo ./shell/workflow-linux-deb.sh
+
+      - name: 上传 DEB 包
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyTierConnector-linux-amd64
+          path: Install/*.deb
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Qt 6.10.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          modules: 'qtsvg'
+          cache: true
+
+      - name: 安装 Inno Setup 6
+        shell: pwsh
+        run: |
+          $url = "https://files.jrsoftware.org/is/6/innosetup-6.4.1.exe"
+          Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\innosetup.exe"
+          Start-Process -FilePath "$env:TEMP\innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
+          Write-Host "Inno Setup 安装完成"
+
+      - name: CMake 配置
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+
+      - name: CMake 编译
+        run: cmake --build build --config Release --parallel $env:NUMBER_OF_PROCESSORS
+
+      - name: CMake 安装
+        run: cmake --install build --config Release
+
+      - name: 提取版本号
+        shell: pwsh
+        run: |
+          $content = Get-Content CMakeLists.txt -Raw
+          if ($content -match 'project\(EasyTierConnector VERSION ([0-9.]+)\)') {
+            $version = $matches[1]
+            Write-Host "版本号: $version"
+            "VERSION=$version" >> $env:GITHUB_ENV
+          } else {
+            Write-Error "无法从 CMakeLists.txt 提取版本号"
+            exit 1
+          }
+
+      - name: Inno Setup 打包
+        shell: pwsh
+        run: |
+          & "${{ github.workspace }}\package\windows\build_win.ps1" --version $env:VERSION
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: EasyTierConnector-win-amd64
+          path: Install/*.exe
