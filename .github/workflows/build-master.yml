@@ -34,7 +34,7 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 安装 MinGW 工具链
+      - name: 安装 MinGW 工具链和 Qt
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -43,16 +43,9 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-ninja
-
-      - name: Install Qt (MinGW)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.10.3'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_mingw'
-          modules: 'qtsvg'
-          cache: true
+            mingw-w64-x86_64-qt6-base
+            mingw-w64-x86_64-qt6-svg
+            mingw-w64-x86_64-qt6-tools
 
       - name: 安装 Inno Setup 6
         shell: pwsh
