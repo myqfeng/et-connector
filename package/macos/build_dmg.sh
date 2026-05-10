@@ -11,7 +11,7 @@ if [[ ! -d "$APP_PATH" ]]; then
 fi
 
 VERSION=$(grep 'project(EasyTierConnector VERSION' "$PROJECT_DIR/CMakeLists.txt" | sed -n 's/.*VERSION \([0-9.]*\).*/\1/p')
-ARCH=$(uname -m)
+ARCH="${1:-$(uname -m)}"
 VOLNAME="EasyTierConnector"
 DMG_NAME="EasyTierConnector_v${VERSION}_mac_${ARCH}.dmg"
 OUTPUT_DIR="$PROJECT_DIR/Install"

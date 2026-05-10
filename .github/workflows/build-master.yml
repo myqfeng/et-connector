@@ -115,8 +115,10 @@ jobs:
         include:
           - runner: macos-14
             arch: arm64
-          - runner: macos-13
+            target_arch: arm64
+          - runner: macos-14
             arch: amd64
+            target_arch: x86_64
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -132,7 +134,7 @@ jobs:
           arch: 'clang_64'
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }}
 
       - name: Build
         run: cmake --build build --parallel $(sysctl -n hw.logicalcpu)
@@ -141,7 +143,7 @@ jobs:
         run: cmake --install build
 
       - name: Create DMG
-        run: bash package/macos/build_dmg.sh
+        run: bash package/macos/build_dmg.sh ${{ matrix.arch }}
 
       - name: 上传 DMG 包
         uses: actions/upload-artifact@v5
