@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # 解析参数
 VERSION=""
 REL="1"
+IS_PRO=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --version)
@@ -16,8 +17,12 @@ while [[ $# -gt 0 ]]; do
             REL="$2"
             shift 2
             ;;
+        --pro)
+            IS_PRO=true
+            shift
+            ;;
         *)
-            echo "用法: $0 --version x.x.x [--rel x]"
+            echo "用法: $0 --version x.x.x [--rel x] [--pro]"
             exit 1
             ;;
     esac
@@ -25,11 +30,20 @@ done
 
 if [[ -z "$VERSION" ]]; then
     echo "错误: --version 参数为必填项"
-    echo "用法: $0 --version x.x.x [--rel x]"
+    echo "用法: $0 --version x.x.x [--rel x] [--pro]"
     exit 1
 fi
 
-echo "=== EasyTier Connector AUR 打包 ==="
+if $IS_PRO; then
+    PKG_NAME="easytier-pro-connector"
+    PKG_DESC="EasyTier Pro Web Connector based on Qt6"
+    echo "=== EasyTier Pro Connector AUR 打包 ==="
+else
+    PKG_NAME="easytier-connector"
+    PKG_DESC="EasyTier Web Connector based on Qt6"
+    echo "=== EasyTier Connector AUR 打包 ==="
+fi
+
 echo "版本号: $VERSION"
 echo "pkgrel: $REL"
 
@@ -43,10 +57,10 @@ rm -f "$AUR_DIR/PKGBUILD" "$AUR_DIR/.SRCINFO"
 cat > "$AUR_DIR/PKGBUILD" <<'EOF'
 # Maintainer: Myqfeng <viagrahuang@outlook.com>
 
-pkgname=easytier-connector
+pkgname=__PKGNAME__
 pkgver=__VERSION__
 pkgrel=__REL__
-pkgdesc="EasyTier Web Connector based on Qt6"
+pkgdesc="__DESC__"
 arch=('x86_64')
 url="https://gitee.com/myqfeng/et-connector"
 license=('LGPL3')
@@ -86,8 +100,10 @@ package() {
 EOF
 
 # 替换占位符
+sed -i "s/__PKGNAME__/$PKG_NAME/g" "$AUR_DIR/PKGBUILD"
 sed -i "s/__VERSION__/$VERSION/g" "$AUR_DIR/PKGBUILD"
 sed -i "s/__REL__/$REL/g" "$AUR_DIR/PKGBUILD"
+sed -i "s/__DESC__/$PKG_DESC/g" "$AUR_DIR/PKGBUILD"
 
 # 生成 .SRCINFO
 echo "正在生成 .SRCINFO..."
@@ -101,6 +117,6 @@ echo "  - PKGBUILD"
 echo "  - .SRCINFO"
 echo ""
 echo "发布步骤:"
-echo "  1. git clone ssh://aur@aur.archlinux.org/easytier-connector.git"
+echo "  1. git clone ssh://aur@aur.archlinux.org/${PKG_NAME}.git"
 echo "  2. 将 PKGBUILD 和 .SRCINFO 复制到 AUR 仓库目录"
 echo "  3. git add . && git commit -m \"Update to v$VERSION\" && git push"

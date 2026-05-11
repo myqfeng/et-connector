@@ -4,6 +4,21 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# 解析参数
+IS_PRO=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --pro)
+            IS_PRO=true
+            shift
+            ;;
+        *)
+            echo "用法: $0 [--pro]"
+            exit 1
+            ;;
+    esac
+done
+
 APP_PATH="$PROJECT_DIR/Install/EasyTierConnector.app"
 if [[ ! -d "$APP_PATH" ]]; then
     echo "错误: 找不到 $APP_PATH，请先完成构建安装"
@@ -12,11 +27,19 @@ fi
 
 VERSION=$(grep 'project(EasyTierConnector VERSION' "$PROJECT_DIR/CMakeLists.txt" | sed -n 's/.*VERSION \([0-9.]*\).*/\1/p')
 ARCH=$(uname -m)
-VOLNAME="EasyTierConnector"
-DMG_NAME="EasyTierConnector_v${VERSION}_mac_${ARCH}.dmg"
+
+if $IS_PRO; then
+    VOLNAME="EasyTierProConnector"
+    DMG_NAME="EasyTierProConnector_v${VERSION}_mac_${ARCH}.dmg"
+    echo "=== EasyTier Pro Connector DMG 打包 ==="
+else
+    VOLNAME="EasyTierConnector"
+    DMG_NAME="EasyTierConnector_v${VERSION}_mac_${ARCH}.dmg"
+    echo "=== EasyTier Connector DMG 打包 ==="
+fi
+
 OUTPUT_DIR="$PROJECT_DIR/Install"
 
-echo "=== EasyTier Connector DMG 打包 ==="
 echo "版本: $VERSION"
 echo "架构: $ARCH"
 
