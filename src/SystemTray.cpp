@@ -27,9 +27,10 @@ SystemTray::SystemTray(QObject *parent)
         std::cerr << "SystemTray: 配置加载失败，使用默认配置" << std::endl;
     }
     
-    // 1.5. 初始化 Casdoor 登录器
+    // 1.5. 初始化 Casdoor 登录器（仅专业版）
+#ifndef IS_COMMUNITY_VER
     m_casdoorLogin = new CasdoorLogin("d3ff87a9cd6317695066", this);
-    connect(m_casdoorLogin, &CasdoorLogin::loginSuccess, this, [this](const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName) {
+    connect(m_casdoorLogin, &CasdoorLogin::loginSuccess, this, [this](const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName, const QString &tenantName) {
         // 拼接完整的连接地址密钥字符串
         QString fullConnectionKey = QString("tcp://et-web.console.easytier.net:22020/%1").arg(deviceKey);
         
@@ -39,55 +40,57 @@ SystemTray::SystemTray(QObject *parent)
         m_configManager->setUserId(userId);
         m_configManager->setUserDisplayName(userDisplayName);
         m_configManager->setOAuthDeviceKey(deviceKey);
+        m_configManager->setTenantDisplayName(tenantName);
         m_configManager->saveConfig();
         
         // 如果服务正在运行，先停止服务，然后启动服务（使用新密钥）
+        showProgressDialog("正在启动 EasyTier 服务...");
         if (ETRunService::isRunning()) {
-            showProgressDialog("正在重启 EasyTier 服务...");
             
             bool stopped = ETRunService::stop();
-            bool started = false;
             
             if (stopped) {
                 QThread::msleep(500);  // 等待资源释放
-                started = ETRunService::start(m_connectionKey);
-            }
-            
-            closeProgressDialog();
-            
-            if (started) {
-                updateStatus(ConnectionState::Connected);
-                m_trayIcon->showMessage("EasyTier", "服务已使用新密钥重启", 
-                                        QSystemTrayIcon::Information, 3000);
             } else {
-                updateStatus(ConnectionState::NotStarted);
-                m_trayIcon->showMessage("错误", "服务重启失败", 
-                                        QSystemTrayIcon::Warning, 5000);
+                QMessageBox::warning(nullptr, "错误", "服务停止失败，请重试!");
+                return;
             }
+        }
+
+        // 启动服务
+        bool started = false;
+        started = ETRunService::start(m_connectionKey);
+        if (started) {
+                updateStatus(ConnectionState::Connected);
+                m_trayIcon->showMessage("EasyTier", "服务已使用新密钥启动",
+                                        QSystemTrayIcon::Information, 3000);
         } else {
-            // 服务未运行，直接提示用户手动启动
-            m_trayIcon->showMessage("登录成功", "密钥已更新，请点击'启动连接'以启动服务", 
-                                    QSystemTrayIcon::Information, 3000);
+            updateStatus(ConnectionState::NotStarted);
+            m_trayIcon->showMessage("错误", "服务启动失败",
+            QSystemTrayIcon::Warning, 5000);
         }
         
         // 更新用户登录状态
         updateUserStatus();
+
+        closeProgressDialog();
     });
     connect(m_casdoorLogin, &CasdoorLogin::loginFailed, this, [this](const QString &errorMessage) {
         QMessageBox::warning(nullptr, "登录失败", errorMessage);
     });
+#endif
     
     // 2. 加载配置
     loadSettings();
     
     // 3. 创建系统托盘图标
     m_trayIcon = new QSystemTrayIcon(this);
-    QIcon icon(":/assets/favicon.svg");
+    QIcon icon(FAVICON_SVG);
     if (icon.isNull()) {
         std::cerr << "SystemTray: 无法加载托盘图标" << std::endl;
     }
     m_trayIcon->setIcon(icon);
-    m_trayIcon->setToolTip("EasyTier 控制台连接器");
+    m_trayIcon->setToolTip(APP_DISPLAY_NAME);
     
     // 4. 创建菜单
     m_menu = new QMenu();
@@ -110,7 +113,11 @@ SystemTray::SystemTray(QObject *parent)
     m_heartbeatTimer->start(2000);
     
     // 8. 更新用户登录状态显示
+#ifndef IS_COMMUNITY_VER
     updateUserStatus();
+#else
+    updateCommunityUserStatus();
+#endif
     
     std::clog << "SystemTray: 初始化完成" << std::endl;
 }
@@ -136,8 +143,8 @@ void SystemTray::show() const
         m_trayIcon->show();
         if (!m_isAutoStartMode) {
             m_trayIcon->showMessage(
-                "EasyTier 控制台连接器", 
-                "EasyTier 控制台连接器已启动", 
+                APP_DISPLAY_NAME,
+                QString("%1 已启动").arg(APP_DISPLAY_NAME), 
                 QSystemTrayIcon::Information, 
                 3000
             );
@@ -148,16 +155,22 @@ void SystemTray::show() const
 void SystemTray::setupMenu()
 {
     // 标题
-    m_titleAction = new QAction(QIcon(":/assets/favicon.svg"), "ET控制台连接器", this);
+    m_titleAction = new QAction(QIcon(FAVICON_SVG), APP_DISPLAY_NAME, this);
     QFont titleFont = m_titleAction->font();
     titleFont.setBold(true);
     titleFont.setPointSize(titleFont.pointSize() + 1);
     m_titleAction->setFont(titleFont);
     m_menu->addAction(m_titleAction);
     
-    // 用户登录状态
+#ifndef IS_COMMUNITY_VER
+    // 专业版：用户登录状态 + 组织信息
     m_userStatusAction = new QAction(QIcon(":/assets/user.svg"), "用户：未登录", this);
     m_menu->addAction(m_userStatusAction);
+    
+    m_tenantStatusAction = new QAction(QIcon(":/assets/tenant.svg"), "", this);
+    m_tenantStatusAction->setVisible(false);
+    m_menu->addAction(m_tenantStatusAction);
+#endif
     
     // 连接状态
     m_statusAction = new QAction(QIcon(":/assets/status-red.svg"), "状态：未启动", this);
@@ -172,21 +185,21 @@ void SystemTray::setupMenu()
     
     m_separator2 = m_menu->addSeparator();
     
-    // 打开 Web 控制台
+#ifdef IS_COMMUNITY_VER
+    // 社区版：设置连接地址与密钥
+    m_settingsAction = new QAction(QIcon(":/assets/settings.svg"), "设置连接地址与密钥", this);
+    connect(m_settingsAction, &QAction::triggered, this, &SystemTray::onSettings);
+    m_menu->addAction(m_settingsAction);
+#else
+    // 专业版：打开 Web 控制台 + 登录 EasyTier Pro
     m_openWebConsoleAction = new QAction(QIcon(":/assets/webconsole.svg"), "打开Web控制台", this);
     connect(m_openWebConsoleAction, &QAction::triggered, this, &SystemTray::onOpenWebConsole);
     m_menu->addAction(m_openWebConsoleAction);
     
-    // 登录 EasyTier Pro
     m_loginEasyTierProAction = new QAction(QIcon(":/assets/login.svg"), "登录 EasyTier Pro", this);
     connect(m_loginEasyTierProAction, &QAction::triggered, this, &SystemTray::onLoginEasyTierPro);
     m_menu->addAction(m_loginEasyTierProAction);
-    
-    // 设置
-    const QString settingsText = "设置连接地址与密钥";
-    m_settingsAction = new QAction(QIcon(":/assets/settings.svg"), settingsText, this);
-    connect(m_settingsAction, &QAction::triggered, this, &SystemTray::onSettings);
-    m_menu->addAction(m_settingsAction);
+#endif
 
     // 清空连接信息
     const QString clearText = "清空连接信息";
@@ -218,6 +231,7 @@ void SystemTray::setupMenu()
     m_menu->addAction(m_quitAction);
 }
 
+#ifndef IS_COMMUNITY_VER
 void SystemTray::updateUserStatus()
 {
     std::clog << "updateUserStatus: m_connectionKey=[" << m_connectionKey.toStdString() << "]" << std::endl;
@@ -240,30 +254,55 @@ void SystemTray::updateUserStatus()
                 m_userStatusAction->setText(QString("用户：%1").arg(userDisplayName));
                 m_userStatusAction->setIcon(QIcon(":/assets/user-loggedin.svg"));
                 m_loginEasyTierProAction->setText("重新登录");
+                
+                // 显示组织信息
+                QString tenantName = m_configManager->getTenantDisplayName();
+                if (!tenantName.isEmpty()) {
+                    m_tenantStatusAction->setText(QString("组织：%1").arg(tenantName));
+                    m_tenantStatusAction->setVisible(true);
+                } else {
+                    m_tenantStatusAction->setVisible(false);
+                }
+                
                 std::clog << "updateUserStatus: 显示已登录用户" << std::endl;
                 return;
             }
         }
         
         // 不一致或未保存，显示未登录
+        m_tenantStatusAction->setVisible(false);
         m_userStatusAction->setText("用户：未登录");
         m_userStatusAction->setIcon(QIcon(":/assets/user.svg"));
         m_loginEasyTierProAction->setText("登录 EasyTier Pro");
         std::clog << "updateUserStatus: 显示未登录" << std::endl;
     } else if (!m_connectionKey.isEmpty()) {
         // 使用自定义连接信息
+        m_tenantStatusAction->setVisible(false);
         m_userStatusAction->setText("自定义连接");
         m_userStatusAction->setIcon(QIcon(":/assets/user-opensource.svg"));
         m_loginEasyTierProAction->setText("登录 EasyTier Pro");
         std::clog << "updateUserStatus: 显示自定义连接" << std::endl;
     } else {
         // 未设置连接地址
+        m_tenantStatusAction->setVisible(false);
         m_userStatusAction->setText("用户：未登录");
         m_userStatusAction->setIcon(QIcon(":/assets/user.svg"));
         m_loginEasyTierProAction->setText("登录 EasyTier Pro");
         std::clog << "updateUserStatus: 显示未登录(空密钥)" << std::endl;
     }
 }
+#endif
+
+#ifdef IS_COMMUNITY_VER
+void SystemTray::updateCommunityUserStatus()
+{
+    if (!m_connectionKey.isEmpty()) {
+        m_statusAction->setText("状态：已设置");
+    } else {
+        m_statusAction->setText("状态：未设置");
+    }
+}
+#endif
 
 void SystemTray::updateStatus(ConnectionState state)
 {
@@ -276,17 +315,17 @@ void SystemTray::updateStatus(ConnectionState state)
     switch (state) {
     case ConnectionState::NotStarted:
         statusText = "状态：未启动";
-        tooltipText = "EasyTier 控制台连接器 - 未启动";
+        tooltipText = QString("%1 - 未启动").arg(APP_DISPLAY_NAME);
         statusIcon = ":/assets/status-red.svg";
         break;
     case ConnectionState::Connecting:
         statusText = "状态：Waiting";
-        tooltipText = "EasyTier 控制台连接器 - 连接中";
+        tooltipText = QString("%1 - 连接中").arg(APP_DISPLAY_NAME);
         statusIcon = ":/assets/status-yellow.svg";
         break;
     case ConnectionState::Connected:
         statusText = "状态：已连接";
-        tooltipText = "EasyTier 控制台连接器 - 已连接";
+        tooltipText = QString("%1 - 已连接").arg(APP_DISPLAY_NAME);
         statusIcon = ":/assets/status-green.svg";
         break;
     }
@@ -383,6 +422,7 @@ void SystemTray::onToggleConnection()
     }
 }
 
+#ifndef IS_COMMUNITY_VER
 void SystemTray::onOpenWebConsole()
 {
     QDesktopServices::openUrl(QUrl("https://console.easytier.net/"));
@@ -393,6 +433,7 @@ void SystemTray::onLoginEasyTierPro()
     // 启动 OAuth 登录流程
     m_casdoorLogin->startLogin();
 }
+#endif
 
 void SystemTray::onSettings()
 {
@@ -409,7 +450,11 @@ void SystemTray::onSettings()
         m_connectionKey = m_settingsDialog->getConnectionKey();
         m_configManager->setConnectionKey(m_connectionKey);
         m_configManager->saveConfig();
+#ifndef IS_COMMUNITY_VER
         updateUserStatus();
+#else
+        updateCommunityUserStatus();
+#endif
     }
      
     // QPointer 会在对象删除后自动变为 nullptr
@@ -433,9 +478,16 @@ void SystemTray::onClearConnectionInfo()
     // 清空连接信息
     m_connectionKey.clear();
     m_configManager->setConnectionKey(QString());
+#ifndef IS_COMMUNITY_VER
     m_configManager->setOAuthDeviceKey(QString());
+    m_configManager->setTenantDisplayName(QString());
+#endif
     m_configManager->saveConfig();
+#ifndef IS_COMMUNITY_VER
     updateUserStatus();
+#else
+    updateCommunityUserStatus();
+#endif
 
     // 如果服务正在运行，停止服务
     if (ETRunService::isRunning()) {
@@ -497,6 +549,46 @@ bool SystemTray::registerAutoStart()
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "注册开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#elif defined(Q_OS_MACOS)
+    // macOS: 使用 ~/Library/LaunchAgents/ 目录下的 plist 文件
+    QString launchAgentsDir = QDir::homePath() + "/Library/LaunchAgents";
+    QDir dir(launchAgentsDir);
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
+    QString plistPath = launchAgentsDir + "/com.easytier.connector.plist";
+    QString plistContent = QString(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+        "<plist version=\"1.0\">\n"
+        "<dict>\n"
+        "    <key>Label</key>\n"
+        "    <string>com.easytier.connector</string>\n"
+        "    <key>ProgramArguments</key>\n"
+        "    <array>\n"
+        "        <string>%1</string>\n"
+        "        <string>--auto-start</string>\n"
+        "    </array>\n"
+        "    <key>RunAtLoad</key>\n"
+        "    <true/>\n"
+        "    <key>KeepAlive</key>\n"
+        "    <false/>\n"
+        "</dict>\n"
+        "</plist>\n"
+    ).arg(appPath);
+
+    QFile plistFile(plistPath);
+    if (!plistFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        std::cerr << "注册开机自启: 失败，无法写入 plist 文件" << std::endl;
+        return false;
+    }
+
+    plistFile.write(plistContent.toUtf8());
+    plistFile.close();
+
+    std::clog << "注册开机自启: 成功" << std::endl;
+    return true;
 #else
     // Linux: 使用 ~/.config/autostart/ 目录下的 .desktop 文件
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
@@ -539,6 +631,11 @@ bool SystemTray::unregisterAutoStart()
     bool success = (settings.status() == QSettings::NoError);
     std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
     return success;
+#elif defined(Q_OS_MACOS)
+    QString plistPath = QDir::homePath() + "/Library/LaunchAgents/com.easytier.connector.plist";
+    bool success = QFile::remove(plistPath);
+    std::clog << "取消开机自启: " << (success ? "成功" : "失败") << std::endl;
+    return success;
 #else
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
     bool success = QFile::remove(desktopFilePath);
@@ -553,6 +650,9 @@ bool SystemTray::isAutoStartRegistered()
     QSettings settings(R"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run)",
                        QSettings::NativeFormat);
     return settings.contains("EasyTierConnector");
+#elif defined(Q_OS_MACOS)
+    QString plistPath = QDir::homePath() + "/Library/LaunchAgents/com.easytier.connector.plist";
+    return QFile::exists(plistPath);
 #else
     QString desktopFilePath = QDir::homePath() + "/.config/autostart/EasyTierConnector.desktop";
     return QFile::exists(desktopFilePath);
@@ -651,10 +751,14 @@ void SystemTray::onQuit()
 
 void SystemTray::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    // 双击打开 Web 控制台
+#ifndef IS_COMMUNITY_VER
+    // 双击打开 Web 控制台（仅专业版）
     if (reason == QSystemTrayIcon::DoubleClick) {
         onOpenWebConsole();
     }
+#else
+    Q_UNUSED(reason);
+#endif
 }
 
 void SystemTray::onHeartbeat()
@@ -682,7 +786,11 @@ void SystemTray::onConnectionKeyChanged()
     m_configManager->saveConfig();
     
     // 更新用户登录状态
+#ifndef IS_COMMUNITY_VER
     updateUserStatus();
+#else
+    updateCommunityUserStatus();
+#endif
     
     // 如果服务已运行
     if (ETRunService::isRunning()) {

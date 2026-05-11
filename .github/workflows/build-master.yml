@@ -13,18 +13,64 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v5
 
-      - name: 设置非交互式环境
-        run: echo "DEBIAN_FRONTEND=noninteractive" | sudo tee -a /etc/environment
-
-      - name: 运行一键编译打包脚本
+      - name: 安装构建依赖
         run: |
-          chmod +x shell/workflow-linux-deb.sh
-          sudo ./shell/workflow-linux-deb.sh
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1-mesa-dev libxkbcommon-dev
 
-      - name: 上传 DEB 包
+      - name: 安装 aqtinstall
+        run: pip install aqtinstall
+
+      - name: 下载 Qt 6.10.3
+        run: aqt install-qt linux desktop 6.10.3 gcc_64 -O ${{ runner.temp }}/Qt
+
+      - name: 提取版本号
+        run: |
+          VERSION=$(grep 'project(EasyTierConnector VERSION' CMakeLists.txt | sed -n 's/.*VERSION \([0-9.]*\).*/\1/p')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      # === 社区版 ===
+      - name: 清理旧构建 (社区版)
+        run: rm -rf build Install
+
+      - name: Configure (社区版)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ runner.temp }}/Qt/6.10.3/gcc_64" -DIS_COMMUNITY_VER=ON
+
+      - name: Build (社区版)
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Install (社区版)
+        run: cmake --install build
+
+      - name: 打包 DEB (社区版)
+        run: bash package/linux/deb/build_deb.sh --version ${{ env.VERSION }}
+
+      - name: 上传 DEB 包 (社区版)
         uses: actions/upload-artifact@v5
         with:
-          name: EasyTierConnector-linux-amd64
+          name: EasyTierConnector-Community-linux-amd64
+          path: Install/*.deb
+
+      # === 专业版 ===
+      - name: 清理旧构建 (专业版)
+        run: rm -rf build Install
+
+      - name: Configure (专业版)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ runner.temp }}/Qt/6.10.3/gcc_64" -DIS_COMMUNITY_VER=OFF
+
+      - name: Build (专业版)
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Install (专业版)
+        run: cmake --install build
+
+      - name: 打包 DEB (专业版)
+        run: bash package/linux/deb/build_deb.sh --version ${{ env.VERSION }} --pro
+
+      - name: 上传 DEB 包 (专业版)
+        uses: actions/upload-artifact@v5
+        with:
+          name: EasyTierConnector-Pro-linux-amd64
           path: Install/*.deb
 
   build-windows:
@@ -72,18 +118,6 @@ jobs:
             Write-Host "Inno Setup 已安装，跳过。"
           }
 
-      - name: Configure
-        shell: bash
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_DIR" -G "Ninja"
-
-      - name: Build
-        shell: bash
-        run: cmake --build build --config Release
-
-      - name: Install
-        shell: bash
-        run: cmake --install build --config Release
-
       - name: 提取版本号
         shell: pwsh
         run: |
@@ -97,13 +131,123 @@ jobs:
             exit 1
           }
 
-      - name: Build installer
+      # === 社区版 ===
+      - name: 清理旧构建 (社区版)
         shell: pwsh
-        run: |
-          & ".\package\windows\build_win.ps1" --version $env:VERSION
+        run: Remove-Item -Recurse -Force build, Install -ErrorAction SilentlyContinue
 
-      - name: 上传安装包
+      - name: Configure (社区版)
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_DIR" -DIS_COMMUNITY_VER=ON -G "Ninja"
+
+      - name: Build (社区版)
+        shell: bash
+        run: cmake --build build --config Release
+
+      - name: Install (社区版)
+        shell: bash
+        run: cmake --install build --config Release
+
+      - name: 打包安装包 (社区版)
+        shell: pwsh
+        run: & ".\package\windows\build_win.ps1" --version $env:VERSION
+
+      - name: 上传安装包 (社区版)
         uses: actions/upload-artifact@v5
         with:
-          name: EasyTierConnector-win-amd64
+          name: EasyTierConnector-Community-win-amd64
           path: Install/*.exe
+
+      # === 专业版 ===
+      - name: 清理旧构建 (专业版)
+        shell: pwsh
+        run: Remove-Item -Recurse -Force build, Install -ErrorAction SilentlyContinue
+
+      - name: Configure (专业版)
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_DIR" -DIS_COMMUNITY_VER=OFF -G "Ninja"
+
+      - name: Build (专业版)
+        shell: bash
+        run: cmake --build build --config Release
+
+      - name: Install (专业版)
+        shell: bash
+        run: cmake --install build --config Release
+
+      - name: 打包安装包 (专业版)
+        shell: pwsh
+        run: & ".\package\windows\build_win.ps1" --version $env:VERSION --pro
+
+      - name: 上传安装包 (专业版)
+        uses: actions/upload-artifact@v5
+        with:
+          name: EasyTierConnector-Pro-win-amd64
+          path: Install/*.exe
+
+  build-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            arch: arm64
+          - runner: macos-13
+            arch: amd64
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v5
+
+      - name: Install Qt 6.10.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+
+      # === 社区版 ===
+      - name: 清理旧构建 (社区版)
+        run: rm -rf build Install
+
+      - name: Configure (社区版)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DIS_COMMUNITY_VER=ON
+
+      - name: Build (社区版)
+        run: cmake --build build --parallel $(sysctl -n hw.logicalcpu)
+
+      - name: Install (社区版)
+        run: cmake --install build
+
+      - name: Create DMG (社区版)
+        run: bash package/macos/build_dmg.sh
+
+      - name: 上传 DMG 包 (社区版)
+        uses: actions/upload-artifact@v5
+        with:
+          name: EasyTierConnector-Community-mac-${{ matrix.arch }}
+          path: Install/*.dmg
+
+      # === 专业版 ===
+      - name: 清理旧构建 (专业版)
+        run: rm -rf build Install
+
+      - name: Configure (专业版)
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DIS_COMMUNITY_VER=OFF
+
+      - name: Build (专业版)
+        run: cmake --build build --parallel $(sysctl -n hw.logicalcpu)
+
+      - name: Install (专业版)
+        run: cmake --install build
+
+      - name: Create DMG (专业版)
+        run: bash package/macos/build_dmg.sh --pro
+
+      - name: 上传 DMG 包 (专业版)
+        uses: actions/upload-artifact@v5
+        with:
+          name: EasyTierConnector-Pro-mac-${{ matrix.arch }}
+          path: Install/*.dmg

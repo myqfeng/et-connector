@@ -20,7 +20,7 @@ QuitConfirmDialog::QuitConfirmDialog(QWidget *parent)
 void QuitConfirmDialog::setupUI()
 {
     setWindowTitle("退出确认");
-    setWindowIcon(QIcon(":/assets/favicon.svg"));
+    setWindowIcon(QIcon(FAVICON_SVG));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(380, 180);
 

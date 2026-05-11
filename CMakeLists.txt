@@ -5,8 +5,11 @@ if(POLICY CMP0177)
     cmake_policy(SET CMP0177 NEW)
 endif()
 
-project(EasyTierConnector VERSION 1.0.0 LANGUAGES CXX)
+project(EasyTierConnector VERSION 0.9.0 LANGUAGES CXX)
 set(ET_VERSION "2.6.3")
+
+# 社区版/专业版 条件编译开关（默认构建社区版）
+set(IS_COMMUNITY_VER ON CACHE BOOL "Build community version (OFF for Pro)")
 
 # 设置默认安装目录为项目根目录的Install文件夹
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
@@ -29,7 +32,6 @@ set(SOURCES
     src/QuitConfirmDialog.cpp
     src/ETRunService.cpp
     src/ConfigManager.cpp
-    src/CasdoorLogin.cpp
 )
 
 # 头文件
@@ -40,8 +42,13 @@ set(HEADERS
     src/QuitConfirmDialog.h
     src/ETRunService.h
     src/ConfigManager.h
-    src/CasdoorLogin.h
 )
+
+# 专业版专用源文件
+if(NOT IS_COMMUNITY_VER)
+    list(APPEND SOURCES src/CasdoorLogin.cpp)
+    list(APPEND HEADERS src/CasdoorLogin.h)
+endif()
 
 # 资源文件
 set(RESOURCES
@@ -66,6 +73,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${PROJECT_VERSION}" ET_VERSION="${ET_VERSION}")
 
+# 社区版/专业版 条件编译定义
+if(IS_COMMUNITY_VER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE IS_COMMUNITY_VER FAVICON_SVG=":/favicon/favicon-open.svg" APP_DISPLAY_NAME="ET Connector")
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE FAVICON_SVG=":/favicon/favicon.svg" APP_DISPLAY_NAME="ET Pro Connector")
+endif()
+
 # Windows特定设置
 if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -74,7 +88,11 @@ if(WIN32)
 
     # 生成 RC 文件引入 manifest 和图标
     set(APP_MANIFEST "${CMAKE_SOURCE_DIR}/app.manifest")
-    set(APP_ICON "${CMAKE_SOURCE_DIR}/assets/favicon.ico")
+    if(IS_COMMUNITY_VER)
+        set(APP_ICON "${CMAKE_SOURCE_DIR}/favicon/favicon-open.ico")
+    else()
+        set(APP_ICON "${CMAKE_SOURCE_DIR}/favicon/favicon.ico")
+    endif()
     set(APP_RC "${CMAKE_BINARY_DIR}/app.rc")
 
     # 检查图标文件是否存在
@@ -98,6 +116,42 @@ IDI_ICON1   ICON    \"${APP_ICON}\"
     target_sources(${PROJECT_NAME} PRIVATE ${APP_RC})
 endif()
 
+# macOS Bundle 配置
+if(APPLE)
+    if(IS_COMMUNITY_VER)
+        set(MACOS_ICON_FILE "favicon-open")
+        set(MACOS_ICON_PATH "${CMAKE_SOURCE_DIR}/favicon/favicon-open.icns")
+    else()
+        set(MACOS_ICON_FILE "favicon")
+        set(MACOS_ICON_PATH "${CMAKE_SOURCE_DIR}/favicon/favicon.icns")
+    endif()
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.easytier.connector"
+        MACOSX_BUNDLE_BUNDLE_NAME "EasyTierConnector"
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+        MACOSX_BUNDLE_ICON_FILE "${MACOS_ICON_FILE}"
+    )
+
+    # 生成 Info.plist
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/assets/Info.plist.in"
+        "${CMAKE_BINARY_DIR}/Info.plist"
+        @ONLY
+    )
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_BINARY_DIR}/Info.plist"
+    )
+
+    # Bundle 图标资源
+    set_source_files_properties("${MACOS_ICON_PATH}" PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+    target_sources(${PROJECT_NAME} PRIVATE "${MACOS_ICON_PATH}")
+endif()
+
 # 安装规则
 install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
@@ -107,6 +161,12 @@ install(TARGETS ${PROJECT_NAME}
 # 复制etcore文件夹到输出目录和安装目录
 if(WIN32)
     set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/windows")
+elseif(APPLE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/mac/aarch64")
+    else()
+        set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/mac/amd64")
+    endif()
 else()
     set(ETCORE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/etcore/linux")
 endif()
@@ -120,16 +180,27 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 
 # 安装etcore目录
-install(CODE "
-    message(STATUS \"部署etcore...\")
-    # 获取安装目录的绝对路径
-    get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
-    execute_process(
-        COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
-            \"${ETCORE_SOURCE_DIR}\"
-            \"\${INSTALL_ABS_PATH}/bin/etcore\"
-    )
-")
+if(APPLE)
+    install(CODE "
+        message(STATUS \"部署etcore到 Bundle...\")
+        get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
+                \"${ETCORE_SOURCE_DIR}\"
+                \"\${INSTALL_ABS_PATH}/${PROJECT_NAME}.app/Contents/MacOS/etcore\"
+        )
+    ")
+else()
+    install(CODE "
+        message(STATUS \"部署etcore...\")
+        get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
+                \"${ETCORE_SOURCE_DIR}\"
+                \"\${INSTALL_ABS_PATH}/bin/etcore\"
+        )
+    ")
+endif()
 
 # 安装时使用windeployqt部署Qt运行时
 if(WIN32)
@@ -160,5 +231,27 @@ if(WIN32)
         ")
     else()
         message(WARNING "未找到windeployqt工具，跳过Qt运行时部署")
+    endif()
+endif()
+
+# 安装时使用 macdeployqt 部署 Qt 框架到 Bundle
+if(APPLE)
+    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS ${QT_HOST_PATH}/bin ${QT6_HOST_PATH}/bin)
+    if(MACDEPLOYQT_EXECUTABLE)
+        install(CODE "
+            message(STATUS \"使用 macdeployqt 部署 Qt 框架...\")
+            get_filename_component(INSTALL_ABS_PATH \"\${CMAKE_INSTALL_PREFIX}\" ABSOLUTE)
+            set(APP_PATH \"\${INSTALL_ABS_PATH}/${PROJECT_NAME}.app\")
+            execute_process(
+                COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"\${APP_PATH}\" -always-overwrite
+                WORKING_DIRECTORY \"\${INSTALL_ABS_PATH}\"
+                RESULT_VARIABLE deploy_result
+            )
+            if(NOT deploy_result EQUAL 0)
+                message(WARNING \"macdeployqt 执行失败，返回码: \${deploy_result}\")
+            endif()
+        ")
+    else()
+        message(WARNING "未找到 macdeployqt 工具，跳过 Qt 框架部署")
     endif()
 endif()

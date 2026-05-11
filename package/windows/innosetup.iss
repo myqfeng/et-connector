@@ -49,7 +49,7 @@ InfoBeforeFile={#ProjectDir}\package\windows\introduction.rtf
 PrivilegesRequired=admin
 OutputDir={#ProjectDir}\Install
 OutputBaseFilename=EasyTierConnector_v{#MyAppVersion}_win_amd64
-SetupIconFile={#ProjectDir}\assets\favicon.ico
+SetupIconFile={#ProjectDir}\favicon\favicon-open.ico
 SolidCompression=yes
 WizardStyle=modern dynamic windows11
 ; 卸载前自动关闭应用程序（通过进程名）

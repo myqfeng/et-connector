@@ -66,8 +66,9 @@ signals:
      * @param displayName 密钥显示名称
      * @param userId 用户ID
      * @param userDisplayName 用户显示名称
+     * @param tenantName 组织显示名称
      */
-    void loginSuccess(const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName);
+    void loginSuccess(const QString &deviceKey, const QString &displayName, const QString &userId, const QString &userDisplayName, const QString &tenantName);
     
     /**
      * @brief 登录失败信号
@@ -85,15 +86,6 @@ private:
     };
     
     /**
-     * @brief 设备接入密钥信息结构
-     */
-    struct DeviceKeyInfo {
-        QString id;
-        QString displayName;
-        QString keyCode;
-    };
-
-    /**
      * @brief 用授权码交换访问令牌
      * @param code 授权码
      */
@@ -106,20 +98,14 @@ private:
     void fetchTenants(const QString &accessToken);
     
     /**
-     * @brief 获取设备接入密钥列表
+     * @brief 创建新的设备接入密钥并获取连接密钥
      * @param accessToken 访问令牌
      * @param tenantId 组织 ID
+     * @param tenantName 组织显示名称
      */
-    void fetchDeviceEnrollmentKeys(const QString &accessToken, const QString &tenantId);
+    void createDeviceEnrollmentKey(const QString &accessToken, const QString &tenantId, const QString &tenantName);
     
-    /**
-     * @brief 获取设备接入密钥详情（真实密钥）
-     * @param accessToken 访问令牌
-     * @param tenantId 组织 ID
-     * @param keyId 密钥 ID
-     * @param displayName 密钥显示名称
-     */
-    void fetchDeviceKeySecret(const QString &accessToken, const QString &tenantId, const QString &keyId, const QString &displayName);
+
     
     /**
      * @brief 显示组织选择对话框
@@ -128,12 +114,7 @@ private:
      */
     int showTenantSelectionDialog(const QList<TenantInfo> &tenants);
     
-    /**
-     * @brief 显示密钥选择对话框
-     * @param keys 密钥列表
-     * @return 选中的密钥索引，-1 表示取消
-     */
-    int showKeySelectionDialog(const QList<DeviceKeyInfo> &keys);
+
     
     /**
      * @brief 生成随机字符串（用于 state 和 code verifier）

@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 
 # 解析参数
 $Version = ""
+$IsPro = $false
 $i = 0
 while ($i -lt $args.Count) {
     switch ($args[$i]) {
@@ -9,8 +10,11 @@ while ($i -lt $args.Count) {
             $i++
             if ($i -lt $args.Count) { $Version = $args[$i] }
         }
+        "--pro" {
+            $IsPro = $true
+        }
         default {
-            Write-Host "用法: $($MyInvocation.MyCommand.Name) --version x.x.x"
+            Write-Host "用法: $($MyInvocation.MyCommand.Name) --version x.x.x [--pro]"
             exit 1
         }
     }
@@ -19,7 +23,7 @@ while ($i -lt $args.Count) {
 
 if (-not $Version) {
     Write-Host "错误: --version 参数为必填项"
-    Write-Host "用法: $($MyInvocation.MyCommand.Name) --version x.x.x"
+    Write-Host "用法: $($MyInvocation.MyCommand.Name) --version x.x.x [--pro]"
     exit 1
 }
 
@@ -27,12 +31,21 @@ if (-not $Version) {
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectDir = Resolve-Path "$ScriptDir\..\.."
 
-# 路径定义
-$IssFile = Join-Path $ScriptDir "innosetup.iss"
+# 根据版本选择 ISS 文件和应用名称
+if ($IsPro) {
+    $IssFile = Join-Path $ScriptDir "innosetup-pro.iss"
+    $AppTitle = "EasyTier Pro Connector"
+    $OutputBase = "EasyTierProConnector_v${Version}_win_amd64.exe"
+} else {
+    $IssFile = Join-Path $ScriptDir "innosetup.iss"
+    $AppTitle = "EasyTier Connector"
+    $OutputBase = "EasyTierConnector_v${Version}_win_amd64.exe"
+}
+
 $InstallBin = Join-Path $ProjectDir "Install\bin"
 $InstallerOutput = Join-Path $ProjectDir "Install"
 
-Write-Host "=== EasyTier Connector Inno Setup ====" -ForegroundColor Cyan
+Write-Host "=== $AppTitle Inno Setup ====" -ForegroundColor Cyan
 Write-Host "项目目录 : $ProjectDir"
 Write-Host "版本号   : $Version"
 Write-Host "输出目录 : $InstallerOutput"
@@ -47,7 +60,7 @@ if (-not (Test-Path $InstallBin)) {
 
 # 检查 iss 文件是否存在
 if (-not (Test-Path $IssFile)) {
-    Write-Host "错误: innosetup.iss 不存在: $IssFile" -ForegroundColor Red
+    Write-Host "错误: ISS 文件不存在: $IssFile" -ForegroundColor Red
     exit 1
 }
 
@@ -106,4 +119,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 $ErrorActionPreference = $prevErrorAction
 
-Write-Host "完成: $InstallerOutput\EasyTierConnector_v${Version}_win_amd64.exe" -ForegroundColor Green
+Write-Host "完成: $InstallerOutput\$OutputBase" -ForegroundColor Green

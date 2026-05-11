@@ -88,6 +88,42 @@ static bool executeElevated(const QString &program,
     }
 
     return true;
+#elif defined(Q_OS_MACOS)
+    // macOS: 使用 osascript 提权，弹出原生认证对话框
+    QString cmd = QString("\"%1\" %2").arg(program, arguments.join(" "));
+    QString appleScript = QString("do shell script \"%1\" with administrator privileges").arg(QString(cmd).replace("\"", "\\\""));
+
+    std::clog << "ETRunService: 执行 osascript 提权命令: " << cmd.toStdString() << std::endl;
+
+    QProcess process;
+    process.setWorkingDirectory(workingDir);
+    process.start("osascript", QStringList() << "-e" << appleScript);
+
+    if (!process.waitForStarted(5000)) {
+        std::cerr << "ETRunService: osascript 启动失败: " << process.errorString().toStdString() << std::endl;
+        return false;
+    }
+
+    if (!process.waitForFinished(120000)) {
+        process.kill();
+        process.waitForFinished(3000);
+        std::cerr << "ETRunService: osascript 命令执行超时" << std::endl;
+        return false;
+    }
+
+    int exitCode = process.exitCode();
+    std::clog << "ETRunService: osascript 命令退出码: " << exitCode << std::endl;
+
+    if (exitCode != 0) {
+        QString errOutput = QString::fromUtf8(process.readAllStandardError());
+        if (errOutput.contains("User canceled", Qt::CaseInsensitive)) {
+            std::cerr << "ETRunService: 用户取消了授权" << std::endl;
+        } else if (!errOutput.isEmpty()) {
+            std::cerr << "ETRunService: osascript 错误输出: " << errOutput.toStdString() << std::endl;
+        }
+    }
+
+    return exitCode == 0;
 #else
     // Linux: 使用 pkexec 提权
     QStringList pkexecArgs;
@@ -189,6 +225,10 @@ bool ETRunService::isServiceInstalled()
     );
 
     return settings.childGroups().contains(SERVICE_NAME);
+#elif defined(Q_OS_MACOS)
+    // macOS: 检查 launchd plist 是否存在
+    QString plistPath = QString("/Library/LaunchDaemons/%1.plist").arg(SERVICE_NAME);
+    return QFile::exists(plistPath);
 #else
     // Linux: 检查 systemd 服务单元文件是否存在
     QString serviceFilePath = QString("/etc/systemd/system/%1.service").arg(SERVICE_NAME);
@@ -383,6 +423,12 @@ bool ETRunService::isRunning()
     // 关闭快照句柄，释放系统资源
     CloseHandle(snapshot);
     return found;
+#elif defined(Q_OS_MACOS)
+    // macOS: 直接检测 easytier-deamon 进程（pgrep 无需提权）
+    QProcess process;
+    process.start("pgrep", QStringList() << "-x" << "easytier-deamon");
+    process.waitForFinished(5000);
+    return process.exitCode() == 0;
 #else
     // Linux: 使用 easytier-cli service status 检查服务状态
     QString cliPath = getCliPath();

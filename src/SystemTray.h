@@ -25,7 +25,9 @@
 #include "QuitConfirmDialog.h"
 #include "ETRunService.h"
 #include "ConfigManager.h"
+#ifndef IS_COMMUNITY_VER
 #include "CasdoorLogin.h"
+#endif
 
 /**
  * @brief 连接状态枚举
@@ -55,8 +57,10 @@ public:
 
 private slots:
     void onToggleConnection();
+#ifndef IS_COMMUNITY_VER
     void onOpenWebConsole();
     void onLoginEasyTierPro();
+#endif
     void onSettings();
     void onAutoStart(bool checked);
     void onAbout();
@@ -71,7 +75,11 @@ private:
     void setupMenu();
     void updateStatus(ConnectionState state);
     void updateConnectionActions() const;
+#ifndef IS_COMMUNITY_VER
     void updateUserStatus();
+#else
+    void updateCommunityUserStatus();
+#endif
     void loadSettings();
     void saveSettings();
     
@@ -87,7 +95,9 @@ private:
     
     // 核心组件
     ConfigManager *m_configManager = nullptr;       ///< 配置管理器
+#ifndef IS_COMMUNITY_VER
     CasdoorLogin *m_casdoorLogin = nullptr;         ///< Casdoor OAuth 登录器
+#endif
     
     // 托盘 UI
     QSystemTrayIcon *m_trayIcon = nullptr;          ///< 系统托盘图标
@@ -96,13 +106,18 @@ private:
     
     // 菜单项
     QAction *m_titleAction = nullptr;
+#ifndef IS_COMMUNITY_VER
     QAction *m_userStatusAction = nullptr;
+    QAction *m_tenantStatusAction = nullptr;
+#endif
     QAction *m_statusAction = nullptr;
     QAction *m_separator1 = nullptr;
     QAction *m_toggleConnectionAction = nullptr;
     QAction *m_separator2 = nullptr;
+#ifndef IS_COMMUNITY_VER
     QAction *m_openWebConsoleAction = nullptr;
     QAction *m_loginEasyTierProAction = nullptr;
+#endif
     QAction *m_settingsAction = nullptr;
     QAction *m_clearConnectionAction = nullptr;
     QAction *m_separator3 = nullptr;
