@@ -23,7 +23,7 @@ void SettingsDialog::setupUI()
 {
     setWindowTitle("设置连接地址与密钥");
 
-    setWindowIcon(QIcon(":/assets/favicon.svg"));
+    setWindowIcon(QIcon(FAVICON_SVG));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(400, 180);
     

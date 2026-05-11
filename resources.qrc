@@ -3,7 +3,8 @@
     <qresource prefix="/">
         <file>assets/autoconnect.svg</file>
         <file>assets/startup.svg</file>
-        <file>assets/favicon.svg</file>
+        <file>favicon/favicon.svg</file>
+        <file>favicon/favicon-open.svg</file>
         <file>assets/status-red.svg</file>
         <file>assets/status-yellow.svg</file>
         <file>assets/status-green.svg</file>

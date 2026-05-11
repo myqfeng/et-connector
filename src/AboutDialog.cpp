@@ -23,8 +23,8 @@ AboutDialog::AboutDialog(QWidget *parent)
 
 void AboutDialog::setupUI()
 {
-    setWindowTitle("关于 EasyTier 控制台连接器");
-    setWindowIcon(QIcon(":/assets/favicon.svg"));
+    setWindowTitle(QString("关于 %1").arg(APP_DISPLAY_NAME));
+    setWindowIcon(QIcon(FAVICON_SVG));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setFixedSize(400, 280);
     
@@ -33,7 +33,7 @@ void AboutDialog::setupUI()
     
     // 图标
     auto *iconLabel = new QLabel(this);
-    QPixmap iconPixmap(":/assets/favicon.svg");
+    QPixmap iconPixmap(FAVICON_SVG);
     if (!iconPixmap.isNull()) {
         iconLabel->setPixmap(iconPixmap.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
@@ -41,7 +41,7 @@ void AboutDialog::setupUI()
     mainLayout->addWidget(iconLabel);
     
     // 标题
-    auto *titleLabel = new QLabel("EasyTier 控制台连接器", this);
+    auto *titleLabel = new QLabel(APP_DISPLAY_NAME, this);
     titleLabel->setAlignment(Qt::AlignCenter);
     QFont titleFont = titleLabel->font();
     titleFont.setBold(true);

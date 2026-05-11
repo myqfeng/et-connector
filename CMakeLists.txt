@@ -8,6 +8,9 @@ endif()
 project(EasyTierConnector VERSION 0.9.0 LANGUAGES CXX)
 set(ET_VERSION "2.6.3")
 
+# 社区版/专业版 条件编译开关（默认构建社区版）
+set(IS_COMMUNITY_VER ON CACHE BOOL "Build community version (OFF for Pro)")
+
 # 设置默认安装目录为项目根目录的Install文件夹
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
 
@@ -29,7 +32,6 @@ set(SOURCES
     src/QuitConfirmDialog.cpp
     src/ETRunService.cpp
     src/ConfigManager.cpp
-    src/CasdoorLogin.cpp
 )
 
 # 头文件
@@ -40,8 +42,13 @@ set(HEADERS
     src/QuitConfirmDialog.h
     src/ETRunService.h
     src/ConfigManager.h
-    src/CasdoorLogin.h
 )
+
+# 专业版专用源文件
+if(NOT IS_COMMUNITY_VER)
+    list(APPEND SOURCES src/CasdoorLogin.cpp)
+    list(APPEND HEADERS src/CasdoorLogin.h)
+endif()
 
 # 资源文件
 set(RESOURCES
@@ -66,6 +73,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${PROJECT_VERSION}" ET_VERSION="${ET_VERSION}")
 
+# 社区版/专业版 条件编译定义
+if(IS_COMMUNITY_VER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE IS_COMMUNITY_VER FAVICON_SVG=":/favicon/favicon-open.svg" APP_DISPLAY_NAME="ET Connector")
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE FAVICON_SVG=":/favicon/favicon.svg" APP_DISPLAY_NAME="ET Pro Connector")
+endif()
+
 # Windows特定设置
 if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -74,7 +88,11 @@ if(WIN32)
 
     # 生成 RC 文件引入 manifest 和图标
     set(APP_MANIFEST "${CMAKE_SOURCE_DIR}/app.manifest")
-    set(APP_ICON "${CMAKE_SOURCE_DIR}/assets/favicon.ico")
+    if(IS_COMMUNITY_VER)
+        set(APP_ICON "${CMAKE_SOURCE_DIR}/favicon/favicon-open.ico")
+    else()
+        set(APP_ICON "${CMAKE_SOURCE_DIR}/favicon/favicon.ico")
+    endif()
     set(APP_RC "${CMAKE_BINARY_DIR}/app.rc")
 
     # 检查图标文件是否存在
@@ -100,13 +118,21 @@ endif()
 
 # macOS Bundle 配置
 if(APPLE)
+    if(IS_COMMUNITY_VER)
+        set(MACOS_ICON_FILE "favicon-open")
+        set(MACOS_ICON_PATH "${CMAKE_SOURCE_DIR}/favicon/favicon-open.icns")
+    else()
+        set(MACOS_ICON_FILE "favicon")
+        set(MACOS_ICON_PATH "${CMAKE_SOURCE_DIR}/favicon/favicon.icns")
+    endif()
+
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.easytier.connector"
         MACOSX_BUNDLE_BUNDLE_NAME "EasyTierConnector"
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
-        MACOSX_BUNDLE_ICON_FILE "favicon.icns"
+        MACOSX_BUNDLE_ICON_FILE "${MACOS_ICON_FILE}"
     )
 
     # 生成 Info.plist
@@ -120,10 +146,10 @@ if(APPLE)
     )
 
     # Bundle 图标资源
-    set_source_files_properties("${CMAKE_SOURCE_DIR}/assets/favicon.icns" PROPERTIES
+    set_source_files_properties("${MACOS_ICON_PATH}" PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources"
     )
-    target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/assets/favicon.icns")
+    target_sources(${PROJECT_NAME} PRIVATE "${MACOS_ICON_PATH}")
 endif()
 
 # 安装规则

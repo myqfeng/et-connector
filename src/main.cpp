@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     
     // 设置应用程序元信息
-    app.setApplicationName("EasyTier Connector");
+    app.setApplicationName(APP_DISPLAY_NAME);
     app.setApplicationVersion(QString(APP_VERSION)+"(et" + ET_VERSION + ")");
     app.setQuitOnLastWindowClosed(false);
     
@@ -73,21 +73,21 @@ int main(int argc, char *argv[])
     // 单实例检测
     const QString serverName = "QtETWebConnector-By-Myqfeng";
     if (isInstanceRunning(serverName)) {
-        QMessageBox::information(nullptr, "EasyTier Connector", "程序已在运行！");
+        QMessageBox::information(nullptr, APP_DISPLAY_NAME, "程序已在运行！");
         return 0;
     }
     
     // 创建单实例锁定服务器
     QLocalServer *localServer = createSingletonServer(app, serverName);
     if (!localServer) {
-        QMessageBox::warning(nullptr, "EasyTier Connector", 
+        QMessageBox::warning(nullptr, APP_DISPLAY_NAME,
                              "无法初始化单实例锁定，程序可能已在运行。");
         // 继续运行，因为可能是权限问题
     }
     
     // 解析命令行参数
     QCommandLineParser parser;
-    parser.setApplicationDescription("EasyTier Connector - EasyTier 控制台连接器");
+    parser.setApplicationDescription(QString("%1 - EasyTier 控制台连接器").arg(APP_DISPLAY_NAME));
     parser.addHelpOption();
     parser.addVersionOption();
     
