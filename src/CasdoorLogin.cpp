@@ -37,6 +37,7 @@ void CasdoorLogin::startLogin()
 {
     // 1. 如果之前有未完成的登录，先清理
     stopLogin();
+    m_proTenants.clear();
 
     // 2. 在本地启动回调服务器（尝试随机端口，最多10000次）
     m_callbackPort = 0;
@@ -221,8 +222,8 @@ void CasdoorLogin::swapCodeForToken(const QString &code)
             // 保存 access_token 供后续使用
             m_accessToken = accessToken;
             
-            // 开始获取租户信息
-            fetchTenants(accessToken);
+            // 开始获取 EasyTier Pro 工作区信息
+            fetchProTenants(accessToken);
         } else {
             emit loginFailed("未获取到访问令牌");
         }
@@ -272,6 +273,23 @@ void CasdoorLogin::stopLogin()
     m_networkManager->disconnect();
 }
 
+void CasdoorLogin::switchProTenant(const QString &tenantId)
+{
+    if (m_accessToken.isEmpty()) {
+        emit loginFailed("登录会话已过期，请重新登录后切换组织");
+        return;
+    }
+
+    for (const ProTenantInfo &tenant : m_proTenants) {
+        if (tenant.id == tenantId) {
+            createDeviceEnrollmentKey(m_accessToken, tenant.id, tenant.name);
+            return;
+        }
+    }
+
+    emit loginFailed("未找到要切换的组织，请重新登录后重试");
+}
+
 
 
 void CasdoorLogin::onLoginTimeout()
@@ -283,7 +301,7 @@ void CasdoorLogin::onLoginTimeout()
     emit loginFailed("登录超时，请在60秒内完成登录");
 }
 
-void CasdoorLogin::fetchTenants(const QString &accessToken)
+void CasdoorLogin::fetchProTenants(const QString &accessToken)
 {
     QUrl url("https://api.console.easytier.net/api/v1/auth/me");
     QNetworkRequest request(url);
@@ -298,7 +316,7 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         reply->deleteLater();
         
         if (reply->error() != QNetworkReply::NoError) {
-            emit loginFailed("获取租户信息失败: " + reply->errorString());
+            emit loginFailed("获取组织列表失败: " + reply->errorString());
             return;
         }
         
@@ -307,7 +325,7 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         QJsonDocument json = QJsonDocument::fromJson(responseData, &parseError);
         
         if (parseError.error != QJsonParseError::NoError) {
-            emit loginFailed("解析租户信息失败: " + parseError.errorString());
+            emit loginFailed("解析组织列表失败: " + parseError.errorString());
             return;
         }
         
@@ -320,14 +338,18 @@ void CasdoorLogin::fetchTenants(const QString &accessToken)
         
         QJsonArray tenantsArray = obj["tenants"].toArray();
         
-        QList<TenantInfo> tenants;
+        QList<ProTenantInfo> tenants;
         for (const QJsonValue &value : tenantsArray) {
             QJsonObject tenantObj = value.toObject();
-            TenantInfo info;
+            ProTenantInfo info;
             info.id = tenantObj["id"].toString();
             info.name = tenantObj["name"].toString();
-            tenants.append(info);
+            if (!info.id.isEmpty()) {
+                tenants.append(info);
+            }
         }
+        m_proTenants = tenants;
+        emit proTenantsUpdated();
         
         if (tenants.isEmpty()) {
             emit loginFailed("未找到任何组织，请确保您有访问权限");
@@ -406,7 +428,7 @@ void CasdoorLogin::createDeviceEnrollmentKey(const QString &accessToken, const Q
 
 
 
-int CasdoorLogin::showTenantSelectionDialog(const QList<TenantInfo> &tenants)
+int CasdoorLogin::showTenantSelectionDialog(const QList<ProTenantInfo> &tenants)
 {
     QDialog dialog;
     dialog.setWindowTitle("请选择组织");
@@ -418,7 +440,7 @@ int CasdoorLogin::showTenantSelectionDialog(const QList<TenantInfo> &tenants)
     layout->addWidget(label);
     
     QListWidget *listWidget = new QListWidget(&dialog);
-    for (const TenantInfo &tenant : tenants) {
+    for (const ProTenantInfo &tenant : tenants) {
         listWidget->addItem(tenant.name);
     }
     listWidget->setCurrentRow(0);
@@ -441,5 +463,3 @@ int CasdoorLogin::showTenantSelectionDialog(const QList<TenantInfo> &tenants)
     }
     return -1;
 }
-
-

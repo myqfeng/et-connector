@@ -61,7 +61,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     
     // 设置应用程序元信息
-    app.setApplicationName(APP_DISPLAY_NAME);
+    // 保持内部 applicationName 为 EasyTier，避免配置路径迁移到 EasyTier Pro/conf.json。
+    app.setApplicationName("EasyTier");
     app.setApplicationVersion(QString(APP_VERSION)+"(et" + ET_VERSION + ")");
     app.setQuitOnLastWindowClosed(false);
     

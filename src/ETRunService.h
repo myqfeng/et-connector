@@ -16,6 +16,19 @@
 #include <QString>
 #include <QStringList>
 
+enum class ServiceError {
+    None,
+    CliMissing,
+    CoreMissing,
+    UacCancelled,
+    InstallFailed,
+    StartFailed,
+    StopFailed,
+    UninstallFailed,
+    Timeout,
+    Unknown
+};
+
 /**
  * @brief 命令执行结果结构体
  */
@@ -24,6 +37,7 @@ struct CommandResult {
     QString output;             ///< 标准输出和标准错误的合并内容
     bool success = false;       ///< 是否执行成功（exitCode == 0）
     QString errorString;        ///< 错误描述（如果有）
+    ServiceError error = ServiceError::None; ///< 结构化错误类型
     
     [[nodiscard]] bool outputContains(const QString &text) const {
         return output.contains(text, Qt::CaseInsensitive);
@@ -55,6 +69,14 @@ public:
      * 如果服务已安装，直接启动（一次 UAC 授权）。
      */
     static bool start(const QString &connectionKey);
+
+    /**
+     * @brief 未安装则安装并启动，已安装则直接启动
+     * @param connectionKey 连接密钥
+     * @param result 可选返回详细结果
+     * @return 是否启动成功
+     */
+    static bool startOrInstall(const QString &connectionKey, CommandResult *result = nullptr);
     
     /**
      * @brief 停止并卸载服务
@@ -63,6 +85,20 @@ public:
      * 合并停止+卸载为一条命令执行，只需一次 UAC 授权。
      */
     static bool stop();
+
+    /**
+     * @brief 暂停连接，仅停止服务，不卸载
+     * @param result 可选返回详细结果
+     * @return 是否停止成功
+     */
+    static bool pauseConnection(CommandResult *result = nullptr);
+
+    /**
+     * @brief 移除服务，停止并卸载
+     * @param result 可选返回详细结果
+     * @return 是否移除成功
+     */
+    static bool removeService(CommandResult *result = nullptr);
     
     /**
      * @brief 查询 easytier-core 进程是否正在运行
@@ -87,6 +123,37 @@ public:
      * @return etcore 目录路径
      */
     static QString getWorkingDirectory();
+
+    /**
+     * @brief 获取 easytier-deamon 路径
+     * @return Core 工具完整路径
+     */
+    static QString getCorePath();
+
+    /**
+     * @brief 查询节点信息 JSON
+     */
+    static CommandResult queryNodeInfoJson(int timeoutMs = 5000);
+
+    /**
+     * @brief 查询 peer 列表 JSON
+     */
+    static CommandResult queryPeerListJson(int timeoutMs = 5000);
+
+    /**
+     * @brief 查询路由列表 JSON
+     */
+    static CommandResult queryRouteListJson(int timeoutMs = 5000);
+
+    /**
+     * @brief 获取 Core 版本输出
+     */
+    static CommandResult queryCoreVersion(int timeoutMs = 5000);
+
+    /**
+     * @brief 错误类型转用户可读文本
+     */
+    static QString serviceErrorToString(ServiceError error);
     
     /**
      * @brief 执行命令并等待完成

@@ -8,8 +8,8 @@ endif()
 project(EasyTierConnector VERSION 0.9.0 LANGUAGES CXX)
 set(ET_VERSION "2.6.3")
 
-# 社区版/专业版 条件编译开关（默认构建社区版）
-set(IS_COMMUNITY_VER ON CACHE BOOL "Build community version (OFF for Pro)")
+# 社区版/专业版 条件编译开关（默认构建专业版）
+set(IS_COMMUNITY_VER OFF CACHE BOOL "Build community version (OFF for Pro)")
 
 # 设置默认安装目录为项目根目录的Install文件夹
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/Install" CACHE PATH "Installation directory" FORCE)
@@ -46,8 +46,16 @@ set(HEADERS
 
 # 专业版专用源文件
 if(NOT IS_COMMUNITY_VER)
-    list(APPEND SOURCES src/CasdoorLogin.cpp)
-    list(APPEND HEADERS src/CasdoorLogin.h)
+    list(APPEND SOURCES
+        src/CasdoorLogin.cpp
+        src/DevicesDialog.cpp
+        src/DiagnosticsDialog.cpp
+    )
+    list(APPEND HEADERS
+        src/CasdoorLogin.h
+        src/DevicesDialog.h
+        src/DiagnosticsDialog.h
+    )
 endif()
 
 # 资源文件
@@ -77,7 +85,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${PROJECT_VERSIO
 if(IS_COMMUNITY_VER)
     target_compile_definitions(${PROJECT_NAME} PRIVATE IS_COMMUNITY_VER FAVICON_SVG=":/favicon/favicon-open.svg" APP_DISPLAY_NAME="ET Connector")
 else()
-    target_compile_definitions(${PROJECT_NAME} PRIVATE FAVICON_SVG=":/favicon/favicon.svg" APP_DISPLAY_NAME="ET Pro Connector")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE FAVICON_SVG=":/favicon/favicon.svg" APP_DISPLAY_NAME="EasyTier Pro")
 endif()
 
 # Windows特定设置
@@ -179,6 +187,41 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "复制etcore文件夹到输出目录"
 )
 
+if(WIN32)
+    get_target_property(QT6_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(QT6_BIN_DIR "${QT6_QMAKE_EXECUTABLE}" DIRECTORY)
+    get_filename_component(QT6_PREFIX_DIR "${QT6_BIN_DIR}" DIRECTORY)
+    set(QT6_TLS_PLUGIN_DIR "${QT6_PREFIX_DIR}/share/qt6/plugins/tls")
+    set(QT6_OPENSSL_DLLS
+        "${QT6_BIN_DIR}/libssl-3-x64.dll"
+        "${QT6_BIN_DIR}/libcrypto-3-x64.dll"
+    )
+
+    if(EXISTS "${QT6_TLS_PLUGIN_DIR}")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${QT6_TLS_PLUGIN_DIR}"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/tls"
+            COMMENT "复制Qt TLS插件到输出目录"
+        )
+    else()
+        message(WARNING "Qt TLS插件目录不存在: ${QT6_TLS_PLUGIN_DIR}")
+    endif()
+
+    foreach(OPENSSL_DLL IN LISTS QT6_OPENSSL_DLLS)
+        if(EXISTS "${OPENSSL_DLL}")
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${OPENSSL_DLL}"
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+                COMMENT "复制OpenSSL运行时到输出目录"
+            )
+        else()
+            message(WARNING "OpenSSL运行时不存在: ${OPENSSL_DLL}")
+        endif()
+    endforeach()
+endif()
+
 # 安装etcore目录
 if(APPLE)
     install(CODE "
@@ -200,6 +243,18 @@ else()
                 \"\${INSTALL_ABS_PATH}/bin/etcore\"
         )
     ")
+endif()
+
+if(WIN32)
+    if(EXISTS "${QT6_TLS_PLUGIN_DIR}")
+        install(DIRECTORY "${QT6_TLS_PLUGIN_DIR}/" DESTINATION bin/tls)
+    endif()
+
+    foreach(OPENSSL_DLL IN LISTS QT6_OPENSSL_DLLS)
+        if(EXISTS "${OPENSSL_DLL}")
+            install(FILES "${OPENSSL_DLL}" DESTINATION bin)
+        endif()
+    endforeach()
 endif()
 
 # 安装时使用windeployqt部署Qt运行时

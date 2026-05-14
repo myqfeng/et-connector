@@ -31,6 +31,14 @@ class CasdoorLogin : public QObject
 
 public:
     /**
+     * @brief EasyTier Pro 工作区信息
+     */
+    struct ProTenantInfo {
+        QString id;
+        QString name;
+    };
+
+    /**
      * @brief 构造函数
      * @param clientId Casdoor 应用的 Client ID
      * @param parent 父对象
@@ -52,6 +60,16 @@ public:
      * @brief 停止登录流程（清理资源）
      */
     void stopLogin();
+
+    /**
+     * @brief 使用当前登录会话切换 EasyTier Pro 工作区
+     */
+    void switchProTenant(const QString &tenantId);
+
+    /**
+     * @brief 当前登录会话可见的 EasyTier Pro 工作区
+     */
+    QList<ProTenantInfo> proTenants() const { return m_proTenants; }
 
 private slots:
     /**
@@ -76,15 +94,12 @@ signals:
      */
     void loginFailed(const QString &errorMessage);
 
-private:
     /**
-     * @brief 组织信息结构
+     * @brief EasyTier Pro 工作区列表已更新
      */
-    struct TenantInfo {
-        QString id;
-        QString name;
-    };
-    
+    void proTenantsUpdated();
+
+private:
     /**
      * @brief 用授权码交换访问令牌
      * @param code 授权码
@@ -92,10 +107,10 @@ private:
     void swapCodeForToken(const QString &code);
     
     /**
-     * @brief 获取租户（组织）信息
+     * @brief 获取 EasyTier Pro 组织信息
      * @param accessToken 访问令牌
      */
-    void fetchTenants(const QString &accessToken);
+    void fetchProTenants(const QString &accessToken);
     
     /**
      * @brief 创建新的设备接入密钥并获取连接密钥
@@ -112,7 +127,7 @@ private:
      * @param tenants 组织列表
      * @return 选中的组织索引，-1 表示取消
      */
-    int showTenantSelectionDialog(const QList<TenantInfo> &tenants);
+    int showTenantSelectionDialog(const QList<ProTenantInfo> &tenants);
     
 
     
@@ -141,6 +156,7 @@ private:
     QString m_accessToken;                    ///< 访问令牌
     QString m_userId;                         ///< 用户ID
     QString m_userDisplayName;                ///< 用户显示名称
+    QList<ProTenantInfo> m_proTenants;        ///< EasyTier Pro 工作区列表
     int m_callbackPort = 0;                   ///< 实际使用的回调端口
     QString m_callbackUrl;                    ///< 动态生成的回调地址
 
